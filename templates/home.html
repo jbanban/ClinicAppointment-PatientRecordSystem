@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Fernandez Dental Clinic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md p-4">
+            <h2 class="text-xl font-bold mb-6 text-blue-700">MediCare Clinic</h2>
+            <ul class="space-y-3">
+                <li><a href="#" class="block px-3 py-2 bg-blue-100 rounded">Dashboard</a></li>
+                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Doctors</a></li>
+                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Patients</a></li>
+                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Appointments</a></li>
+                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Reports</a></li>
+                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Settings</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="flex-1 p-6">
+            <div class="flex justify-between mb-6">
+                <h1 class="text-2xl font-semibold">Dashboard</h1>
+                <div class="flex items-center gap-2">
+                    <span class="font-medium">Admin User</span>
+                    <img src="https://via.placeholder.com/30" alt="profile" class="rounded-full w-8 h-8">
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded shadow">
+                    <p class="text-sm text-gray-500">Total Patients</p>
+                    <p class="text-xl font-bold">1,248</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow">
+                    <p class="text-sm text-gray-500">Total Doctors</p>
+                    <p class="text-xl font-bold">24</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow">
+                    <p class="text-sm text-gray-500">Appointments</p>
+                    <p class="text-xl font-bold">432</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow">
+                    <p class="text-sm text-gray-500">Revenue</p>
+                    <p class="text-xl font-bold">$45,231.89</p>
+                </div>
+            </div>
+
+            <!-- Stats + Activities -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-semibold mb-2">Appointment Statistics</h3>
+                    <div class="h-40 flex items-center justify-center text-gray-400">[Appointment Chart]</div>
+                </div>
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="font-semibold mb-2">Recent Activities</h3>
+                    <ul class="text-sm space-y-2">
+                        <li>🟢 New patient registered - 10 mins ago</li>
+                        <li>🟢 Dr. Johnson completed appointment - 25 mins ago</li>
+                        <li>🟢 New appointment scheduled - 1 hour ago</li>
+                        <li>🟢 Lab results uploaded - 2 hours ago</li>
+                        <li>🟢 Billing invoice generated - 3 hours ago</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

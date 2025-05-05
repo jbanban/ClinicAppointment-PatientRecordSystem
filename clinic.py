@@ -6,7 +6,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['SECRET_KEY'] = 'wowixczzzzz'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fernandez_clinic.db'
 db = SQLAlchemy(app)
 
@@ -18,13 +18,13 @@ login_manager.init_app(app)
 class Base(DeclarativeBase):
     pass
 
-class Patient(Base):
+class Patient(db.Model):
     __tablename__ = "patient"
 
     patient_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
-    birthdate: Mapped[str] = mapped_column(String(10))  # Use DATE in real DB, simplified here
+    birthdate: Mapped[str] = mapped_column(String(10))
     gender: Mapped[str] = mapped_column(String(10))
     contact_number: Mapped[str] = mapped_column(String(20))
 
@@ -32,7 +32,7 @@ class Patient(Base):
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="patient")
 
 
-class Doctor(Base):
+class Doctor(db.Model):
     __tablename__ = "doctor"
 
     doctor_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -45,14 +45,14 @@ class Doctor(Base):
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="doctor")
 
 
-class Appointment(Base):
+class Appointment(db.Model):
     __tablename__ = "appointment"
 
     appointment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
-    appointment_date: Mapped[str] = mapped_column(String(10))  # Simplified
-    appointment_time: Mapped[str] = mapped_column(String(10))  # Simplified
+    appointment_date: Mapped[str] = mapped_column(String(10))
+    appointment_time: Mapped[str] = mapped_column(String(10)) 
     status: Mapped[str] = mapped_column(String(20))
 
     patient: Mapped["Patient"] = relationship(back_populates="appointments")
@@ -60,13 +60,13 @@ class Appointment(Base):
     invoices: Mapped[list["Invoice"]] = relationship(back_populates="appointment")
 
 
-class MedicalRecord(Base):
+class MedicalRecord(db.Model):
     __tablename__ = "medical_record"
 
     record_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
-    visit_date: Mapped[str] = mapped_column(String(10))  # Simplified
+    visit_date: Mapped[str] = mapped_column(String(10))
     diagnosis: Mapped[str] = mapped_column(String)
     notes: Mapped[str] = mapped_column(String)
 
@@ -75,7 +75,7 @@ class MedicalRecord(Base):
     prescriptions: Mapped[list["Prescription"]] = relationship(back_populates="record")
 
 
-class Prescription(Base):
+class Prescription(db.Model):
     __tablename__ = "prescription"
 
     prescription_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -87,22 +87,22 @@ class Prescription(Base):
     record: Mapped["MedicalRecord"] = relationship(back_populates="prescriptions")
 
 
-class Service(Base):
+class Service(db.Model):
     __tablename__ = "service"
 
     service_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(String)
-    fee: Mapped[str] = mapped_column(String(20))  # Simplified DECIMAL
+    fee: Mapped[str] = mapped_column(String(20))
 
 
-class Invoice(Base):
+class Invoice(db.Model):
     __tablename__ = "invoice"
 
     invoice_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     appointment_id: Mapped[int] = mapped_column(ForeignKey("appointment.appointment_id"))
     service_id: Mapped[int] = mapped_column(ForeignKey("service.service_id"))
-    amount: Mapped[str] = mapped_column(String(20))  # Simplified DECIMAL
+    amount: Mapped[str] = mapped_column(String(20))  
     payment_status: Mapped[str] = mapped_column(String(20))
 
     appointment: Mapped["Appointment"] = relationship(back_populates="invoices")
@@ -121,29 +121,6 @@ class Account(db.Model):
 
     def get_id(self):
         return str(self.account_id)
-    
-class Patient(db.Model):
-    __tablename__ = "patient"
-    patient_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(50))
-    birthdate: Mapped[Date] = mapped_column(Date)
-    gender: Mapped[str] = mapped_column(String(10))
-    contact_number: Mapped[str] = mapped_column(String(20))
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"))
-
-    account = relationship("Account", back_populates="patient")
-
-class Doctor(db.Model):
-    __tablename__ = "doctor"
-    doctor_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(50))
-    specialization: Mapped[str] = mapped_column(String(100))
-    contact_number: Mapped[str] = mapped_column(String(20))
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"))
-
-    account = relationship("Account", back_populates="doctor")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -155,6 +132,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = Account.query.filter_by(username=username).first()
+        
         if user and check_password_hash(user.password, password):
             login_user(user)
             if user.role == 'admin':
@@ -171,21 +149,20 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        role = request.form['role']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         email = request.form['email']
         phone = request.form['phone']
         birthdate = request.form['birthdate']
-        username = request.form['username']
         password = request.form['password']
+        role = request.form['role']
 
-        existing_user = Account.query.filter_by(username=username).first()
+        existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
             return render_template('register.html', error="Username already exists.")
 
         hashed_pw = generate_password_hash(password)
-        new_account = Account(username=username, password=hashed_pw, role=role)
+        new_account = Account(first_name=first_name, last_name=last_name, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
         db.session.add(new_account)
         db.session.commit()
 
@@ -228,5 +205,9 @@ def unauthorized():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
     app.run(debug=True)

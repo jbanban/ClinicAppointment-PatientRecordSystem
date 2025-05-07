@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, ForeignKey, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -10,13 +9,10 @@ app.config['SECRET_KEY'] = 'wowixczzzzz'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fernandez_clinic.db'
 db = SQLAlchemy(app)
 
-login_manager = LoginManager()
-login_manager.login_view = 'login'
-login_manager.init_app(app)
-
 
 class Base(DeclarativeBase):
     pass
+
 
 class Patient(db.Model):
     __tablename__ = "patient"
@@ -28,7 +24,6 @@ class Patient(db.Model):
     gender: Mapped[str] = mapped_column(String(10))
     contact_number: Mapped[str] = mapped_column(String(20))
     account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
-
 
     account: Mapped["Account"] = relationship(back_populates="patient")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="patient")
@@ -45,7 +40,6 @@ class Doctor(db.Model):
     contact_number: Mapped[str] = mapped_column(String(20))
     account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
 
-
     account: Mapped["Account"] = relationship(back_populates="doctor")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="doctor")
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="doctor")
@@ -58,7 +52,7 @@ class Appointment(db.Model):
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
     appointment_date: Mapped[str] = mapped_column(String(10))
-    appointment_time: Mapped[str] = mapped_column(String(10)) 
+    appointment_time: Mapped[str] = mapped_column(String(10))
     status: Mapped[str] = mapped_column(String(20))
 
     patient: Mapped["Patient"] = relationship(back_populates="appointments")
@@ -108,7 +102,7 @@ class Invoice(db.Model):
     invoice_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     appointment_id: Mapped[int] = mapped_column(ForeignKey("appointment.appointment_id"))
     service_id: Mapped[int] = mapped_column(ForeignKey("service.service_id"))
-    amount: Mapped[str] = mapped_column(String(20))  
+    amount: Mapped[str] = mapped_column(String(20))
     payment_status: Mapped[str] = mapped_column(String(20))
 
     appointment: Mapped["Appointment"] = relationship(back_populates="invoices")
@@ -124,44 +118,37 @@ class Account(db.Model):
     phone: Mapped[str] = mapped_column(String(20))
     birthdate: Mapped[str] = mapped_column(String(10))
     password: Mapped[str] = mapped_column(String(100))
-    role: Mapped[str] = mapped_column(String(20)) 
+    role: Mapped[str] = mapped_column(String(20))
 
     patient = relationship("Patient", back_populates="account", uselist=False)
     doctor = relationship("Doctor", back_populates="account", uselist=False)
-    
-    def get_id(self):
-        return str(self.account_id)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Account.query.get(int(user_id))
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    print(request.form)
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
 
         user = Account.query.filter_by(email=email).first()
-        
+
         if user and check_password_hash(user.password, password):
-            login_user(user)
-            if user.role == 'admin':
-                flash('Logged in successfully.','success')
+            session['user_id'] = user.account_id
+            session['role'] = user.role
+            if role == 'admin':
+                flash('Logged in successfully.', 'success')
                 return redirect(url_for('admin_dashboard'))
-            elif user.role == 'doctor':
-                flash('Logged in successfully.','success')
+            elif role == 'doctor':
+                flash('Logged in successfully.', 'success')
                 return redirect(url_for('doctor_dashboard'))
-            elif user.role == 'patient':
-                flash('Logged in successfully.','success')
+            elif role == 'patient':
+                flash('Logged in successfully.', 'success')
                 return redirect(url_for('patient_dashboard'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
             return render_template('login.html')
     return render_template('login.html')
-
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -177,12 +164,12 @@ def register():
 
         existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
-            flash("Username already exists!", "danger")
+            flash("Email already exists!", "danger")
             return redirect(url_for('register'))
 
         hashed_pw = generate_password_hash(password)
         new_account = Account(firstname=firstname, lastname=lastname, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
-        
+
         db.session.add(new_account)
         db.session.commit()
 
@@ -192,25 +179,22 @@ def register():
 
 
 @app.route('/admin/dashboard')
-@login_required
 def admin_dashboard():
-    if current_user.role != 'admin':
+    if 'role' not in session or session['role'] != 'admin':
         return redirect(url_for('unauthorized'))
     return render_template('admin_dashboard.html')
 
 
 @app.route('/doctor/dashboard')
-@login_required
 def doctor_dashboard():
-    if current_user.role != 'doctor':
+    if 'role' not in session or session['role'] != 'doctor':
         return redirect(url_for('unauthorized'))
     return render_template('doctor_dashboard.html')
 
 
 @app.route('/patient/dashboard')
-@login_required
 def patient_dashboard():
-    if current_user.role != 'patient':
+    if 'role' not in session or session['role'] != 'patient':
         return redirect(url_for('unauthorized'))
     return render_template('patient_dashboard.html')
 
@@ -221,10 +205,10 @@ def unauthorized():
 
 
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
+    session.clear()
     return redirect(url_for('login'))
+
 
 with app.app_context():
     db.create_all()

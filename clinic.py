@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, ForeignKey, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -27,7 +27,10 @@ class Patient(db.Model):
     birthdate: Mapped[str] = mapped_column(String(10))
     gender: Mapped[str] = mapped_column(String(10))
     contact_number: Mapped[str] = mapped_column(String(20))
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
 
+
+    account: Mapped["Account"] = relationship(back_populates="patient")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="patient")
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="patient")
 
@@ -40,7 +43,10 @@ class Doctor(db.Model):
     last_name: Mapped[str] = mapped_column(String(50))
     specialization: Mapped[str] = mapped_column(String(100))
     contact_number: Mapped[str] = mapped_column(String(20))
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
 
+
+    account: Mapped["Account"] = relationship(back_populates="doctor")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="doctor")
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="doctor")
 
@@ -112,13 +118,17 @@ class Invoice(db.Model):
 class Account(db.Model):
     __tablename__ = "account"
     account_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String(50), unique=True)
+    firstname: Mapped[str] = mapped_column(String(50), unique=True)
+    lastname: Mapped[str] = mapped_column(String(50), unique=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True)
+    phone: Mapped[str] = mapped_column(String(20))
+    birthdate: Mapped[str] = mapped_column(String(10))
     password: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(20)) 
 
     patient = relationship("Patient", back_populates="account", uselist=False)
     doctor = relationship("Doctor", back_populates="account", uselist=False)
-
+    
     def get_id(self):
         return str(self.account_id)
 
@@ -128,41 +138,51 @@ def load_user(user_id):
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    print(request.form)
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
-        user = Account.query.filter_by(username=username).first()
+        role = request.form['role']
+
+        user = Account.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
             login_user(user)
             if user.role == 'admin':
+                flash('Logged in successfully.','success')
                 return redirect(url_for('admin_dashboard'))
             elif user.role == 'doctor':
+                flash('Logged in successfully.','success')
                 return redirect(url_for('doctor_dashboard'))
             elif user.role == 'patient':
+                flash('Logged in successfully.','success')
                 return redirect(url_for('patient_dashboard'))
         else:
-            return render_template('login.html', error="Invalid credentials.")
+            flash('Login Unsuccessful. Please check email and password', 'danger')
+            return render_template('login.html')
     return render_template('login.html')
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
         email = request.form['email']
         phone = request.form['phone']
         birthdate = request.form['birthdate']
         password = request.form['password']
-        role = request.form['role']
+        role = request.form.get('role', 'patient')
 
         existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
-            return render_template('register.html', error="Username already exists.")
+            flash("Username already exists!", "danger")
+            return redirect(url_for('register'))
 
         hashed_pw = generate_password_hash(password)
-        new_account = Account(first_name=first_name, last_name=last_name, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
+        new_account = Account(firstname=firstname, lastname=lastname, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
+        
         db.session.add(new_account)
         db.session.commit()
 

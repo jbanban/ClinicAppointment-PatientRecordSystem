@@ -11,15 +11,15 @@
         <h2 class="text-xl font-semibold text-center mb-4">Create an Account</h2>
         <form action="{{ url_for('register') }}" method="POST" class="space-y-4">
             <div class="flex gap-2">
-                <input type="text" id="first_name" name="first_name" class="w-1/2 px-4 py-2 border rounded" placeholder="First Name" required>
-                <input type="text" id="last_name" name="last_name" class="w-1/2 px-4 py-2 border rounded" placeholder="Last Name" required>
+                <input type="text" id="firstname" name="firstname" class="w-1/2 px-4 py-2 border rounded" placeholder="First Name" required>
+                <input type="text" id="lastname" name="lastname" class="w-1/2 px-4 py-2 border rounded" placeholder="Last Name" required>
             </div>
             <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded" placeholder="Email" required>
             <input type="tel" id="phone" name="phone" class="w-full px-4 py-2 border rounded" placeholder="Phone Number" required>
             <input type="date" id="birthdate" name="birthdate" class="w-full px-4 py-2 border rounded" required>
             <input type="password" class="w-full px-4 py-2 border rounded" placeholder="Password" required>
             <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded" placeholder="Confirm Password" required>
-            <input type="text" id="role" name="role" class="w-full px-4 py-2 bg-blue-300 border rounded" value="Patient" disabled>
+            <input type="text" id="role" name="role" class="w-full px-4 py-2 bg-blue-300 border rounded" value="Patient" readonly>
             <div class="flex justify-between pt-4">
                 <button class="w-3/12 text-white"></button>
                 <button type="submit" class="w-5/12 bg-black text-white py-2 rounded hover:bg-gray-800">Create Account</button>

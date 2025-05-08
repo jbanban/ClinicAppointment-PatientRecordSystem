@@ -5,32 +5,37 @@
     <title>Login | Fernandez Dental Clinic</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-b from-blue-100 to-white min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-blue-700 mb-12">Fernandez Dental Clinic</h1>
-        <h2 class="text-xl font-semibold text-center mb-4">Login</h2>
-        <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
-            <div>
-                <label>Email</label>
-                <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded" required>
+<body class="bg-gradient-to-b from-blue-100 to-white">
+    <div class="fixed top-0 right-0 m-4">
+        <a href="{{ url_for('admin_login')}}">Login as Admin</a>
+    </div>
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+            <h1 class="text-2xl font-bold text-center text-blue-700 mb-12">Fernandez Dental Clinic</h1>
+            <h2 class="text-xl font-semibold text-center mb-4">Login</h2>
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
+                <div>
+                    <label>Email</label>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded" required>
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded" required>
+                </div>
+                <div>
+                    <label>Login as:</label>
+                    <select class="w-full px-4 py-2 border rounded" id="role" name="role">
+                        <option disabled selected>-- select role --</option>
+                        <option>Patient</option>
+                        <option>Doctor</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">Login</button>
+            </form>
+            <div class="text-center mt-4">
+                <a href="#" class="text-sm text-blue-600">Forgot your password?</a><br>
+                <span class="text-sm">Don't have an account? <a href="/register" class="text-blue-600">Sign up</a></span>
             </div>
-            <div>
-                <label>Password</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded" required>
-            </div>
-            <div>
-                <label>Login as:</label>
-                <select class="w-full px-4 py-2 border rounded" id="role" name="role">
-                    <option disabled selected>-- select role --</option>
-                    <option>Patient</option>
-                    <option>Doctor</option>
-                </select>
-            </div>
-            <button type="submit" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">Login</button>
-        </form>
-        <div class="text-center mt-4">
-            <a href="#" class="text-sm text-blue-600">Forgot your password?</a><br>
-            <span class="text-sm">Don't have an account? <a href="/register" class="text-blue-600">Sign up</a></span>
         </div>
     </div>
 </body>

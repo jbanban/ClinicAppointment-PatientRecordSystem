@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, ForeignKey, Date
+from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -111,7 +111,7 @@ class Invoice(db.Model):
 
 class Account(db.Model):
     __tablename__ = "account"
-    account_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    account_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     firstname: Mapped[str] = mapped_column(String(50), unique=True)
     lastname: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
@@ -123,6 +123,41 @@ class Account(db.Model):
     patient = relationship("Patient", back_populates="account", uselist=False)
     doctor = relationship("Doctor", back_populates="account", uselist=False)
 
+class User(db.Model):
+    __tablename__ = "user"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, autoincrement=True) 
+    username: Mapped[str] = mapped_column(String(50), unique=True)
+    password: Mapped[str] = mapped_column(String(100))
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            flash('Logged in successfully.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+            return render_template('admin_login.html')
+    return render_template('admin_login.html')
+
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        new_user = User(username=username, password=generate_password_hash(password, method='sha256'))
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created!', 'success')
+        return redirect(url_for('admin_login'))
+    return render_template('admin_register.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -136,10 +171,7 @@ def login():
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.account_id
             session['role'] = user.role
-            if role == 'admin':
-                flash('Logged in successfully.', 'success')
-                return redirect(url_for('admin_dashboard'))
-            elif role == 'doctor':
+            if role == 'doctor':
                 flash('Logged in successfully.', 'success')
                 return redirect(url_for('doctor_dashboard'))
             elif role == 'patient':
@@ -180,8 +212,6 @@ def register():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    if 'role' not in session or session['role'] != 'admin':
-        return redirect(url_for('unauthorized'))
     return render_template('admin_dashboard.html')
 
 

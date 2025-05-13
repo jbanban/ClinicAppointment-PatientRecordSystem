@@ -1,29 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard | Fernandez Dental Clinic</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% extends 'base/layout.html' %}
+{% block title %}Dashboard | Fernandez Dental Clinic{% endblock %}
+{% block content %}
 <body class="bg-gray-100">
     <div class="flex h-screen">
-        <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-md p-4">
-            <h2 class="text-xl font-bold mb-6 text-blue-700">Fernandez Dental Clinic</h2>
-            <ul class="space-y-3">
-                <li><a href="#" class="block px-3 py-2 bg-blue-100 rounded">Dashboard</a></li>
-                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Doctors</a></li>
-                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Patients</a></li>
-                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Appointments</a></li>
-                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Reports</a></li>
-                <li><a href="#" class="block px-3 py-2 hover:bg-blue-50 rounded">Settings</a></li>
-            </ul>
-        </div>
+        {% include 'admin/admin_sidebar.html' %}
 
         <!-- Main Dashboard Content -->
         <div class="flex-1 p-6">
             <div class="flex justify-between mb-6">
-                <h1 class="text-2xl font-semibold">Dashboard</h1>
+                <h1 class="text-2xl font-semibold text-blue-700">Dashboard</h1>
                 <div class="flex items-center gap-2">
                     <span class="font-medium">Admin User</span>
                     <img src="https://via.placeholder.com/30" alt="profile" class="rounded-full w-8 h-8">
@@ -70,4 +55,4 @@
         </div>
     </div>
 </body>
-</html>
+{% endblock %}

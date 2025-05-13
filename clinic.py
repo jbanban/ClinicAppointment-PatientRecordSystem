@@ -144,7 +144,7 @@ def admin_login():
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')
             return render_template('admin_login.html')
-    return render_template('admin_login.html')
+    return render_template('admin/admin_login.html')
 
 @app.route('/admin/register', methods=['GET', 'POST'])
 def admin_register():
@@ -157,7 +157,7 @@ def admin_register():
         db.session.commit()
         flash('Account created!', 'success')
         return redirect(url_for('admin_login'))
-    return render_template('admin_register.html')
+    return render_template('admin/admin_register.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -212,8 +212,19 @@ def register():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
+    return render_template('admin/admin_dashboard.html')
 
+@app.route('/admin_doctors')
+def admin_doctors():
+    return render_template('admin/admin_doctors.html')
+
+@app.route('/add_doctor')
+def add_doctor():
+    return render_template('admin/add_doctor.html')
+
+@app.route('/admin_appointments')
+def admin_appointments():
+    return render_template('admin/admin_appointments.html')
 
 @app.route('/doctor/dashboard')
 def doctor_dashboard():
@@ -228,6 +239,27 @@ def patient_dashboard():
         return redirect(url_for('unauthorized'))
     return render_template('patient_dashboard.html')
 
+@app.route('/doctors')
+def doctors():
+    return render_template('doctors.html')
+
+@app.route('/patients')
+def patients():
+    return render_template('patients.html')
+
+@app.route('/appointments')
+def appointments():
+    return render_template('appointments.html')
+
+@app.route('/reports')
+def reports():
+    
+    return render_template('reports.html')
+
+@app.route('/settings')
+def settings():
+    return redirect(url_for('unauthorized'))
+    return render_template('settings.html')
 
 @app.route('/unauthorized')
 def unauthorized():

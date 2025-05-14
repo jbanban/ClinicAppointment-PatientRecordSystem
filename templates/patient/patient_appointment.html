@@ -1,0 +1,47 @@
+{% extends 'base/layout.html' %}
+{% block title %}Doctors | Fernandez Dental Clinic{% endblock %}
+{% block content %}
+<div class="flex h-screen">
+    {% include 'patient/patient_sidebar.html' %}
+
+    <!-- Main Appointments Content -->
+    <div class="flex-1 p-6">
+        <div class="flex justify-end gap-2 mb-12">
+                <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                    <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
+                </a>
+            </div>
+        <div class="flex justify-between mb-4 align-center">
+            <h1 class="text-2xl font-bold text-blue-700">My Appointments</h1>
+        </div>
+        <div class="flex flex-col">
+            <div class="overflow-x-auto">
+                <div class="p-1.5 w-full inline-block align-middle">
+                    <div class="overflow-hidden border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 text-center align-center">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Time</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Patient</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Doctor</th>
+                                </tr>
+                            </thead>
+                            <tbody  class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08/01/2023</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08:00 AM</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">John Paul Mark Salugta</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">active 30min ago</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">Dr. Jp Salugta</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

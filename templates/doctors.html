@@ -8,8 +8,9 @@
         <div class="flex justify-between mb-12 align-center">
             <h1 class="text-2xl font-bold text-blue-700">Doctors</h1>
             <div class="flex items-center gap-2">
-                <span class="font-medium">Admin User</span>
-                <img src="https://via.placeholder.com/30" alt="profile" class="rounded-full w-8 h-8">
+                <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                    <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
+                </a>
             </div>
         </div>
         <div class="flex flex-row border border-gray-700 rounded">

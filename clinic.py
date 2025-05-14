@@ -143,7 +143,7 @@ def admin_login():
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')
-            return render_template('admin_login.html')
+            return render_template('admin/admin_login.html')
     return render_template('admin/admin_login.html')
 
 @app.route('/admin/register', methods=['GET', 'POST'])
@@ -165,7 +165,6 @@ def login():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
-
         user = Account.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.password, password):
@@ -218,6 +217,10 @@ def admin_dashboard():
 def admin_doctors():
     return render_template('admin/admin_doctors.html')
 
+@app.route('/patients_list')
+def patients_list():
+    return render_template('admin/patients_list.html')
+
 @app.route('/add_doctor')
 def add_doctor():
     return render_template('admin/add_doctor.html')
@@ -235,9 +238,11 @@ def doctor_dashboard():
 
 @app.route('/patient/dashboard')
 def patient_dashboard():
-    if 'role' not in session or session['role'] != 'patient':
-        return redirect(url_for('unauthorized'))
-    return render_template('patient_dashboard.html')
+    return render_template('patient/patient_dashboard.html')
+
+@app.route('/available_doctors')
+def available_doctors():
+    return render_template('patient/available_doctors.html')
 
 @app.route('/doctors')
 def doctors():
@@ -246,6 +251,10 @@ def doctors():
 @app.route('/patients')
 def patients():
     return render_template('patients.html')
+
+@app.route('/patient_appointment')
+def patient_appointment():
+    return render_template('patient/patient_appointment.html')
 
 @app.route('/appointments')
 def appointments():
@@ -265,6 +274,10 @@ def settings():
 def unauthorized():
     return "Unauthorized access", 403
 
+@app.route('/profile/<int:user_id>', methods=['GET'])
+def profile(user_id):
+    user = User.query.get(user_id)
+    return render_template('profile.html',user=user)
 
 @app.route('/logout')
 def logout():

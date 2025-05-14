@@ -3,17 +3,15 @@
 {% block content %}
 <div class="flex h-screen">
     
-{% include 'admin/admin_sidebar.html' %}
+{% include 'patient/patient_sidebar.html' %}
     <div class="flex-1 p-6 ">
         <div class="flex justify-end mb-12">
-            <span class="font-medium">Admin User</span>
-            <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
+            <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
+            </a>
         </div>
         <div class="flex justify-between mb-2 align-center">
-            <h1 class="text-2xl font-bold text-blue-700">Doctors</h1>
-            <div class="flex items-center gap-2 ">
-                <button class="text-blue-600 border-gray-700 py-2 px-4 rounded hover:bg-blue-200 hover:text-white" type="button" href="{{ url_for('add_doctor') }}">Add Doctor</button>
-            </div>
+            <h1 class="text-2xl font-bold text-blue-700">Available Doctors</h1>
         </div>
         <div class="flex flex-col">
             <div class="overflow-x-auto">

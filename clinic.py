@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy import Integer, String, ForeignKey, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -34,10 +34,23 @@ class Doctor(db.Model):
     __tablename__ = "doctor"
 
     doctor_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(50))
+    firstname: Mapped[str] = mapped_column(String(50))
+    middlename: Mapped[str] = mapped_column(String(50), nullable=True)
+    lastname: Mapped[str] = mapped_column(String(50))
+    age: Mapped[int] = mapped_column(Integer)
+    bloodtype: Mapped[str] = mapped_column(String(5), nullable=True)
+    height: Mapped[str] = mapped_column(String, nullable=True)
+    weight: Mapped[str] = mapped_column(String, nullable=True)
     specialization: Mapped[str] = mapped_column(String(100))
-    contact_number: Mapped[str] = mapped_column(String(20))
+    gender: Mapped[str] = mapped_column(String(20))
+    dob: Mapped[str] = mapped_column(String(10))
+    pob: Mapped[str] = mapped_column(String(100), nullable=True)
+    civilstatus: Mapped[str] = mapped_column(String(20), nullable=True)
+    degree: Mapped[str] = mapped_column(String(100), nullable=True)
+    nationality: Mapped[str] = mapped_column(String(50), nullable=True)
+    religion: Mapped[str] = mapped_column(String(50), nullable=True)
+    phone: Mapped[str] = mapped_column(String(20))
+    email: Mapped[str] = mapped_column(String(100))
     account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
 
     account: Mapped["Account"] = relationship(back_populates="doctor")
@@ -221,20 +234,93 @@ def admin_doctors():
 def patients_list():
     return render_template('admin/patients_list.html')
 
-@app.route('/add_doctor')
+@app.route('/add_doctor', methods=['GET', 'POST'])
 def add_doctor():
-    return render_template('admin/add_doctor.html')
+    doctors = Doctor.query.all()
+
+    if request.method == 'POST':
+        firstname = request.form['firstname']
+        middlename = request.form['middlename']
+        lastname = request.form['lastname']
+        age = request.form['age']
+        bloodtype = request.form['bloodtype']
+        height = request.form['height']
+        weight = request.form['weight']
+        specialization = request.form['specialization']
+        gender = request.form['gender']
+        dob = request.form['dob']
+        pob = request.form['pob']
+        civilstatus = request.form.get('civilstatus')
+        degree = request.form.get('degree')
+        nationality = request.form['nationality']
+        religion = request.form['religion']
+        phone = request.form['phone']
+        email = request.form['email']
+
+        new_doctor = Doctor(firstname=firstname, 
+                            middlename=middlename, 
+                            lastname=lastname, 
+                            age=age, 
+                            bloodtype=bloodtype, 
+                            height=height, 
+                            weight=weight, 
+                            specialization=specialization,
+                            gender=gender, 
+                            dob=dob, 
+                            pob=pob, 
+                            civilstatus=civilstatus, 
+                            degree=degree, 
+                            nationality=nationality, 
+                            religion=religion, 
+                            phone=phone, 
+                            email=email
+                        )
+        db.session.add(new_doctor)
+        db.session.commit()
+    return render_template('admin/add_doctor.html', doctors=doctors)
 
 @app.route('/admin_appointments')
 def admin_appointments():
     return render_template('admin/admin_appointments.html')
+
+@app.route('/admin_reports')
+def admin_reports():
+    return render_template('admin/admin_reports.html')
+
+@app.route('/admin_settings')
+def admin_settings():
+    return render_template('admin/admin_settings.html')
+
+@app.route('/settings/doctor/create_account', methods=['GET', 'POST'])
+def create_doctor_account():
+    if request.method == 'POST':
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        email = request.form['email']
+        phone = request.form['phone']
+        birthdate = request.form['birthdate']
+        password = request.form['password']
+        role = request.form.get('role', 'doctor')
+
+        existing_user = Account.query.filter_by(email=email).first()
+        if existing_user:
+            flash("Email already exists!", "danger")
+            return redirect(url_for('register'))
+
+        hashed_pw = generate_password_hash(password)
+        new_account = Account(firstname=firstname, lastname=lastname, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
+
+        db.session.add(new_account)
+        db.session.commit()
+
+        return redirect(url_for('create_doctor_account'))
+    return render_template('admin/create_doctor_account.html')
 
 @app.route('/doctor/dashboard')
 def doctor_dashboard():
     if 'role' not in session or session['role'] != 'doctor':
         return redirect(url_for('unauthorized'))
     return render_template('doctor_dashboard.html')
-
 
 @app.route('/patient/dashboard')
 def patient_dashboard():
@@ -267,7 +353,6 @@ def reports():
 
 @app.route('/settings')
 def settings():
-    return redirect(url_for('unauthorized'))
     return render_template('settings.html')
 
 @app.route('/unauthorized')

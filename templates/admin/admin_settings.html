@@ -1,21 +1,22 @@
 {% extends "base/layout.html" %}
 {% block title %} Settings {% endblock title %}
 {% block content %}
-<div class="flex h-screen">
-    {% include 'admin/admin_sidebar.html' %}
-    <div class="flex-1 p-6 ">
+<body class="bg-white">
+    {% include 'include/navbar.html' %}
+    <main class="main-content mt-0">
         <section>
             <div class="page-header min-h-screen py-12">
                 <div class="container mx-auto px-6">
                     <div class="row">
                         <div class="card shadow-md rounded-lg bg-white p-6 mt-2">
-                            <div class="card-header pb-0 text-left bg-transparent mb-4">
+                            <div class="card-header pb-0 text-left bg-transparent">
                                 <h3 class="font-bold text-xl">
                                     SETTINGS
                                 </h3>
+                                <hr class="horizontal border-gray-300 mt-0">
                             </div>
-                            <!-- <div class="col-8 flex items-center py-4">
-                                <p class="col-lg-6 w-1/2">SAMPLE</p>
+                            <div class="col-8 flex items-center py-4">
+                                <p class="col-lg-6 w-1/2">Purok Records</p>
                                 <div class="col-lg-4 w-1/2 text-right mt-4 mb-0">
                                     <a href="/purok">
                                         <button type="button" class="btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded shadow w-auto">Go to Purok Records</button>
@@ -24,18 +25,18 @@
                             </div>
                             <hr class="horizontal border-gray-300 mt-0">
                             <div class="col-8 flex items-center py-4">
-                                <p class="col-lg-6 w-1/2">SAMPLE</p>
+                                <p class="col-lg-6 w-1/2">Household Records</p>
                                 <div class="col-lg-4 w-1/2 text-right mt-4 mb-0">
                                     <a href="/household">
                                         <button type="button" class="btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded shadow w-auto">Go to Household Records</button>
                                     </a>
                                 </div>
-                            </div> -->
+                            </div>
                             <hr class="horizontal border-gray-300 mt-0">
                             <div class="col-8 flex items-center py-4">
                                 <p class="col-lg-6 w-1/2">Create Account</p>
                                 <div class="col-lg-4 w-1/2 text-right mt-4 mb-0">
-                                    <a href="{{ url_for('create_doctor_account') }}">
+                                    <a href="/register">
                                         <button type="button" class="btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded shadow w-auto">Go to Create Account</button>
                                     </a>
                                 </div>
@@ -46,5 +47,5 @@
             </div>
         </section>
     </main>
-</div>
+</body>
 {% endblock content %}

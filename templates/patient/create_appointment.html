@@ -1,0 +1,16 @@
+<form method="POST">
+    <label for="preferred_date">Date:</label>
+    <input type="date" name="preferred_date" required>
+
+    <label for="preferred_time">Time:</label>
+    <input type="time" name="preferred_time" required>
+
+    <select name="doctor_id" required>
+        <option disabled selected>-- Select a doctor --</option>
+        {% for doctor in doctors %}
+        <option value="{{ doctor.doctor_id }}">{{ doctor.lastname }}, {{ doctor.firstname }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Book Appointment</button>
+</form>

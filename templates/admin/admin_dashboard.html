@@ -1,5 +1,33 @@
 {% extends 'base/layout.html' %}
 {% block title %}Dashboard | Fernandez Dental Clinic{% endblock %}
+{% block styles %}
+<style>
+h1, h2 {
+    color: #333;
+}
+.statistic-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+.statistic-item {
+    margin-bottom: 10px;
+}
+.statistic-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+ul li {
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}
 {% block content %}
 <body class="bg-gray-100">
     <div class="flex h-screen">
@@ -38,10 +66,10 @@
             </div>
 
             <!-- Stats + Activities -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded shadow">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="chart-container bg-white p-4 rounded shadow">
                     <h3 class="font-semibold mb-2">Appointment Statistics</h3>
-                    <div class="h-40 flex items-center justify-center text-gray-400">[Appointment Chart]</div>
+                    <canvas id="monthlyAppointmentsChart"></canvas>
                 </div>
                 <div class="bg-white p-4 rounded shadow">
                     <h3 class="font-semibold mb-2">Recent Activities</h3>
@@ -54,7 +82,81 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="statistic-section">
+                <h2>Monthly Appointments</h2>
+                {% if statistics.monthly_counts %}
+                <ul>
+                    {% for month, count in statistics.monthly_counts.items() %}
+                    <li><span class="statistic-label">{{ month }}:</span> {{ count }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No monthly data available.</p>
+                {% endif %}
+            </div>
+
+            <div class="statistic-section">
+                <h2>Appointment Status</h2>
+                {% if statistics.status_counts %}
+                <ul>
+                    {% for status, count in statistics.status_counts.items() %}
+                    <li><span class="statistic-label">{{ status }}:</span> {{ count }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>No status data available.</p>
+                {% endif %}
+            </div>
+
+            <div class="statistic-section">
+                <h2>Busiest Day of the Week</h2>
+                <p class="statistic-item">
+                    {% if statistics.busiest_day_of_week %}
+                    <span class="statistic-label">Day:</span> {{ statistics.busiest_day_of_week }}
+                    {% else %}
+                    No appointment data to determine the busiest day.
+                    {% endif %}
+                </p>
+            </div>
         </div>
     </div>
+    <script>
+        const monthlyData = {{ statistics.monthly_counts|tojson }};
+        const labels = Object.keys(monthlyData);
+        const data = Object.values(monthlyData);
+
+        const ctx = document.getElementById('monthlyAppointmentsChart').getContext('2d');
+        const monthlyAppointmentsChart = new Chart(ctx, {
+            type: 'bar', // You can change this to 'line', 'pie', etc.
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Monthly Appointments',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Appointments'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 {% endblock %}

@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+import numpy as np
+from datetime import datetime
+from collections import Counter
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, ForeignKey, Float
+from sqlalchemy import Integer, String, ForeignKey, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -18,11 +21,12 @@ class Patient(db.Model):
     __tablename__ = "patient"
 
     patient_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(50))
+    firstname: Mapped[str] = mapped_column(String(50))
+    lastname: Mapped[str] = mapped_column(String(50))
     birthdate: Mapped[str] = mapped_column(String(10))
     gender: Mapped[str] = mapped_column(String(10))
-    contact_number: Mapped[str] = mapped_column(String(20))
+    address: Mapped[str] = mapped_column(String(100))
+    phone: Mapped[str] = mapped_column(String(20))
     account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
 
     account: Mapped["Account"] = relationship(back_populates="patient")
@@ -79,26 +83,38 @@ class MedicalRecord(db.Model):
     record_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
+    schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.schedule_id"))
     visit_date: Mapped[str] = mapped_column(String(10))
     diagnosis: Mapped[str] = mapped_column(String)
     notes: Mapped[str] = mapped_column(String)
 
     patient: Mapped["Patient"] = relationship(back_populates="records")
     doctor: Mapped["Doctor"] = relationship(back_populates="records")
-    prescriptions: Mapped[list["Prescription"]] = relationship(back_populates="record")
+    schedule: Mapped[list["Schedule"]] = relationship(back_populates="record")
 
 
-class Prescription(db.Model):
-    __tablename__ = "prescription"
+class Doctor_Schedule(db.Model):
+    __tablename__ = "doctor_schedule"
 
-    prescription_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    record_id: Mapped[int] = mapped_column(ForeignKey("medical_record.record_id"))
-    medication_name: Mapped[str] = mapped_column(String(100))
-    dosage: Mapped[str] = mapped_column(String(50))
-    instructions: Mapped[str] = mapped_column(String)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
+    vacant_date: Mapped[str] = mapped_column(String(10))
+    vacant_time: Mapped[str] = mapped_column(String(10))
+    status: Mapped[str] = mapped_column(String(20))
 
-    record: Mapped["MedicalRecord"] = relationship(back_populates="prescriptions")
+    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule")
 
+
+class Schedule(db.Model):
+    __tablename__ = "schedule"
+
+    schedule_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
+    id: Mapped[int] = mapped_column(ForeignKey("doctor_schedule.id"))
+    status: Mapped[str] = mapped_column(String(20))
+    timestamp: Mapped[str] = mapped_column(TIMESTAMP)
+
+    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule")
 
 class Service(db.Model):
     __tablename__ = "service"
@@ -125,11 +141,7 @@ class Invoice(db.Model):
 class Account(db.Model):
     __tablename__ = "account"
     account_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    firstname: Mapped[str] = mapped_column(String(50), unique=True)
-    lastname: Mapped[str] = mapped_column(String(50), unique=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
-    phone: Mapped[str] = mapped_column(String(20))
-    birthdate: Mapped[str] = mapped_column(String(10))
     password: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(20))
 
@@ -141,6 +153,58 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, autoincrement=True) 
     username: Mapped[str] = mapped_column(String(50), unique=True)
     password: Mapped[str] = mapped_column(String(100))
+
+def calculate_appointment_statistics():
+    appointments = db.session.query(Appointment).all()
+
+    if not appointments:
+        return {
+            'total_appointments': 0,
+            'monthly_counts': {},
+            'status_counts': {},
+            'average_appointments_per_day': 0,
+            'busiest_day_of_week': None
+        }
+
+    # Combine date and time into a datetime object for analysis
+    appointment_datetimes = np.array([
+        datetime.strptime(f"{appt.appointment_date} {appt.appointment_time}", '%Y-%m-%d %H:%M')
+        for appt in appointments
+    ])
+
+    # Total number of appointments
+    total_appointments = len(appointments)
+
+    # Monthly appointment counts
+    months = [date.strftime('%Y-%m') for date in appointment_datetimes]
+    monthly_counts = Counter(months)
+
+    # Appointment status counts
+    statuses = [appt.status for appt in appointments]
+    status_counts = Counter(statuses)
+
+    # Average appointments per day
+    if appointment_datetimes.size > 0:
+        unique_days = np.unique(appointment_datetimes.astype('datetime64[D]'))
+        average_appointments_per_day = total_appointments / len(unique_days)
+    else:
+        average_appointments_per_day = 0
+
+    # Busiest day of the week
+    if appointment_datetimes.size > 0:
+        days_of_week = [date.strftime('%A') for date in appointment_datetimes]
+        day_counts = Counter(days_of_week)
+        busiest_day = day_counts.most_common(1)[0][0]
+    else:
+        busiest_day = None
+
+    return {
+        'total_appointments': total_appointments,
+        'monthly_counts': dict(monthly_counts),
+        'status_counts': dict(status_counts),
+        'average_appointments_per_day': round(average_appointments_per_day, 2),
+        'busiest_day_of_week': busiest_day
+    }
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -188,7 +252,7 @@ def login():
                 return redirect(url_for('doctor_dashboard'))
             elif role == 'patient':
                 flash('Logged in successfully.', 'success')
-                return redirect(url_for('patient_dashboard'))
+                return redirect(url_for('create_profile'))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
             return render_template('login.html')
@@ -198,11 +262,7 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
         email = request.form['email']
-        phone = request.form['phone']
-        birthdate = request.form['birthdate']
         password = request.form['password']
         role = request.form.get('role', 'patient')
 
@@ -212,7 +272,7 @@ def register():
             return redirect(url_for('register'))
 
         hashed_pw = generate_password_hash(password)
-        new_account = Account(firstname=firstname, lastname=lastname, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
+        new_account = Account(email=email,password=hashed_pw, role=role)
 
         db.session.add(new_account)
         db.session.commit()
@@ -224,11 +284,13 @@ def register():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    return render_template('admin/admin_dashboard.html')
+    statistics = calculate_appointment_statistics()
+    return render_template('admin/admin_dashboard.html', statistics=statistics)
 
 @app.route('/admin_doctors')
 def admin_doctors():
-    return render_template('admin/admin_doctors.html')
+    doctors = Doctor.query.all()
+    return render_template('admin/admin_doctors.html', doctors=doctors)
 
 @app.route('/patients_list')
 def patients_list():
@@ -236,7 +298,7 @@ def patients_list():
 
 @app.route('/add_doctor', methods=['GET', 'POST'])
 def add_doctor():
-    doctors = Doctor.query.all()
+    accounts = Account.query.all()
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -256,6 +318,7 @@ def add_doctor():
         religion = request.form['religion']
         phone = request.form['phone']
         email = request.form['email']
+        account_id = request.form['account_id']
 
         new_doctor = Doctor(firstname=firstname, 
                             middlename=middlename, 
@@ -273,11 +336,12 @@ def add_doctor():
                             nationality=nationality, 
                             religion=religion, 
                             phone=phone, 
-                            email=email
+                            email=email,
+                            account_id=account_id
                         )
         db.session.add(new_doctor)
         db.session.commit()
-    return render_template('admin/add_doctor.html', doctors=doctors)
+    return render_template('admin/add_doctor.html', accounts=accounts)
 
 @app.route('/admin_appointments')
 def admin_appointments():
@@ -293,12 +357,10 @@ def admin_settings():
 
 @app.route('/settings/doctor/create_account', methods=['GET', 'POST'])
 def create_doctor_account():
+    doctors = Doctor.query.all()
+
     if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
         email = request.form['email']
-        phone = request.form['phone']
-        birthdate = request.form['birthdate']
         password = request.form['password']
         role = request.form.get('role', 'doctor')
 
@@ -308,13 +370,13 @@ def create_doctor_account():
             return redirect(url_for('register'))
 
         hashed_pw = generate_password_hash(password)
-        new_account = Account(firstname=firstname, lastname=lastname, email=email, phone=phone, birthdate=birthdate, password=hashed_pw, role=role)
+        new_account = Account(email=email, password=hashed_pw, role=role)
 
         db.session.add(new_account)
         db.session.commit()
 
         return redirect(url_for('create_doctor_account'))
-    return render_template('admin/create_doctor_account.html')
+    return render_template('admin/create_doctor_account.html',doctors=doctors)
 
 @app.route('/doctor/dashboard')
 def doctor_dashboard():
@@ -338,17 +400,78 @@ def doctors():
 def patients():
     return render_template('patients.html')
 
-@app.route('/patient_appointment')
-def patient_appointment():
-    return render_template('patient/patient_appointment.html')
+@app.route('/create_profile', methods=['GET', 'POST'])
+def create_profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        phone = request.form['phone']
+        birthdate = request.form['birthdate']
+        gender = request.form['gender']
+        address = request.form['address']
+        account_id = user_id
+
+
+        patient = Patient(firstname=firstname, lastname=lastname, phone=phone, birthdate=birthdate, gender=gender, address=address, account_id=account_id)
+
+        db.session.add(patient)
+        db.session.commit()
+
+        return redirect(url_for('patient_profile'))
+
+    return render_template('patient/create_profile.html')
+
+@app.route('/patient_profile')
+def patient_profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    profile = Patient.query.filter_by(account_id=user_id).first()
+    if not profile:
+        return redirect(url_for('create_profile'))
+    
+    return render_template('patient/patient_profile.html', profile=profile)
 
 @app.route('/appointments')
 def appointments():
     return render_template('appointments.html')
+@app.route('/patient/appointment', methods=['GET', 'POST'])
+def patient_appointment():
+    if 'patient_id' not in session:
+        return redirect('/patient/login')
+
+    patient_id = session['patient_id']
+
+    if request.method == 'POST':
+        appointment_date = request.form['preferred_date']
+        appointment_time = request.form['preferred_time']
+        doctor_id = request.form['doctor_id']
+        status = 'Pending'
+
+        new_appointment = Appointment(
+            patient_id=patient_id,
+            doctor_id=doctor_id,
+            appointment_date=appointment_date,
+            appointment_time=appointment_time,
+            status=status
+        )
+
+        db.session.add(new_appointment)
+        db.session.commit()
+
+        return redirect(url_for('patient_dashboard'))
+
+    doctors = Doctor.query.all()
+
+    return render_template('patient_appointment.html', doctors=doctors)
 
 @app.route('/reports')
 def reports():
-    
     return render_template('reports.html')
 
 @app.route('/settings')

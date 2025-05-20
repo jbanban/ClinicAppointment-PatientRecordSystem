@@ -28,22 +28,19 @@
                                     <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-200 ">
                                 {% for doctor in doctors %}
                                 <tr class="bg-white">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        {{ doctor.first_name }} {{ doctor.last_name }}
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-500 whitespace-nowrap">
+                                        {{ doctor.firstname }} {{ doctor.lastname }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        {{ doctor.email }}
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        {{ doctor.specialization }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        {{ doctor.phone }}
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        <span class="inline-flex items-center rounded-full bg-gradient-to-r from-gray-400 to-gray-600 px-5 py-1 text-xs font-semibold text-white">Active</span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        {{ doctor.address }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                         <a href="#" class="text-blue-600 m-4">View</a>
                                         <a href="#" class="text-red-600 m-4">Delete</a>
                                     </td>

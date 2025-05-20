@@ -1,0 +1,112 @@
+{% extends 'base/layout.html' %}
+{% block title %}Patient Profile{% endblock %}
+{% block content %}
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+
+        <div class="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
+            
+            <!-- Content -->
+            <form action="/create_profile" method="POST">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-800">Personal Information</h2>
+                    <p class="text-sm text-gray-600 mb-6">Update your personal details and contact information.</p>
+                    
+                    <!-- Form -->
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label name="firstname" id="firstname" class="block text-sm text-gray-600 mb-1">First name</label>
+                                <input type="text" name="firstname" id="firstname" placeholder="John" class="w-full border border-gray-300 rounded p-2 text-sm">
+                            </div>
+                            <div>
+                                <label name="lastname" id="lastname" class="block text-sm text-gray-600 mb-1">Last name</label>
+                                <input type="text" name="lastname"id="lastname" placeholder="Doe" class="w-full border border-gray-300 rounded p-2 text-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label name="email" id="email" class="block text-sm text-gray-600 mb-1">Email</label>
+                                <input type="email" name="email" id="email" placeholder="john.doe@example.com" class="w-full border border-gray-300 rounded p-2 text-sm">
+                            </div>
+                            <div>
+                                <label name="phone" id="phone" class="block text-sm text-gray-600 mb-1">Phone number</label>
+                                <input type="text" name="phone" id="phone" placeholder="(555) 123-4567" class="w-full border border-gray-300 rounded p-2 text-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label name="birthdate" id="birthdate" class="block text-sm text-gray-600 mb-1">Date of birth</label>
+                                <input type="date" name="birthdate" id="birthdate" placeholder="10/15/1985" class="w-full border border-gray-300 rounded p-2 text-sm">
+                            </div>
+                            <div>
+                                <label name="gender" id="gender" class="block text-sm text-gray-600 mb-1">Gender</label>
+                                <select name="gender" id="gender" class="w-full border border-gray-300 rounded p-2 text-sm">
+                                    <option value="" disabled selected>-- Select gender --</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label name="address" id="address" class="block text-sm text-gray-600 mb-1">Address</label>
+                            <input type="text" name="address" id="address" placeholder="123 Main St, Anytown, USA" class="w-full border border-gray-300 rounded p-2 text-sm">
+                        </div>
+                    </div>
+                    
+                    <!-- Preferences -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Contact Preferences</h2>
+                        <p class="text-sm text-gray-600 mb-4">Manage how we contact you.</p>
+                        
+                        <div class="border-b border-gray-100 py-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-medium text-gray-800">Email notifications</h4>
+                                <p class="text-xs text-gray-500">Receive emails about your appointments and treatments.</p>
+                            </div>
+                            <!-- Toggle -->
+                            <div class="relative inline-block w-12 align-middle">
+                                <input type="checkbox" id="toggle1" checked class="sr-only peer">
+                                <div class="block h-6 w-11 rounded-full bg-gray-300 peer-checked:bg-blue-500"></div>
+                                <div class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-all peer-checked:translate-x-5"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-b border-gray-100 py-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-medium text-gray-800">SMS notifications</h4>
+                                <p class="text-xs text-gray-500">Receive text messages for appointment reminders.</p>
+                            </div>
+                            <!-- Toggle -->
+                            <div class="relative inline-block w-12 align-middle">
+                                <input type="checkbox" id="toggle2" checked class="sr-only peer">
+                                <div class="block h-6 w-11 rounded-full bg-gray-300 peer-checked:bg-blue-500"></div>
+                                <div class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-all peer-checked:translate-x-5"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="py-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-medium text-gray-800">Mobile app notifications</h4>
+                                <p class="text-xs text-gray-500">Receive updates about new services and health tips.</p>
+                            </div>
+                            <!-- Toggle -->
+                            <div class="relative inline-block w-12 align-middle">
+                                <input type="checkbox" id="toggle3" class="sr-only peer">
+                                <div class="block h-6 w-11 rounded-full bg-gray-300 peer-checked:bg-blue-500"></div>
+                                <div class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-all peer-checked:translate-x-5"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full mt-5 bg-green-500 text-white py-2 px-4 rounded flex items-center justify-center">
+                            Save Profile
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+{% endblock %}

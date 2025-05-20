@@ -20,30 +20,26 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Name</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Specialization</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Action</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">Name</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">Specialization</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-center text-gray-500 uppercase ">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 {% for doctor in doctors %}
                                 <tr class="bg-white">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                                        {{ doctor.first_name }} {{ doctor.last_name }}
+                                    <td class="px-6 py-4 text-sm text-center font-medium text-gray-800 whitespace-nowrap">
+                                        {{ doctor.firstname }} {{ doctor.lastname }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                         {{ doctor.email }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                         {{ doctor.phone }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                        {{ doctor.address }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
                                         <a href="#" class="text-blue-600 m-4">View</a>
-                                        <a href="#" class="text-red-600 m-4">Delete</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

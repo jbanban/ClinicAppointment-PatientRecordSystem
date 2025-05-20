@@ -2,7 +2,7 @@
 {% block title %}Doctors | Fernandez Dental Clinic{% endblock %}
 {% block content %}
 <div class="flex h-screen">
-    {% include 'patient/patient_sidebar.html' %}
+    {% include 'doctor/doctor_sidebar.html' %}
 
     <!-- Main Appointments Content -->
     <div class="flex-1 p-6">
@@ -21,21 +21,30 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 text-center align-center">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Date</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Time</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Patient</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Doctor</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Time</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Patient</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Action</th>
                                 </tr>
                             </thead>
                             <tbody  class="bg-white divide-y divide-gray-200">
+                                {% for appointment in appointments %}
                                 <tr>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08/01/2023</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08:00 AM</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">John Paul Mark Salugta</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">active 30min ago</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">Dr. Jp Salugta</th>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.appointment_date }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.appointment_time }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.patient.firstname }} {{ appointment.patient.lastname }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.status }}</th>
+                                    <td class="items-center justify-center inline-flex">
+                                        <form action="{{ url_for('accept_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                            <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Accept</button>
+                                        </form>
+                                        <form action="{{ url_for('reject_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
+                                            <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Reject</button>
+                                        </form>
+                                    </td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

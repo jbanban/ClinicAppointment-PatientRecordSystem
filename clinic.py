@@ -27,7 +27,7 @@ class Patient(db.Model):
     gender: Mapped[str] = mapped_column(String(10))
     address: Mapped[str] = mapped_column(String(100))
     phone: Mapped[str] = mapped_column(String(20))
-    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True)
+    account_id: Mapped[int] = mapped_column(ForeignKey("account.account_id"), unique=True, nullable=False)
 
     account: Mapped["Account"] = relationship(back_populates="patient")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="patient")
@@ -60,6 +60,8 @@ class Doctor(db.Model):
     account: Mapped["Account"] = relationship(back_populates="doctor")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="doctor")
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="doctor")
+    schedules = relationship("Doctor_Schedule", back_populates="doctor")
+
 
 
 class Appointment(db.Model):
@@ -90,19 +92,20 @@ class MedicalRecord(db.Model):
 
     patient: Mapped["Patient"] = relationship(back_populates="records")
     doctor: Mapped["Doctor"] = relationship(back_populates="records")
-    schedule: Mapped[list["Schedule"]] = relationship(back_populates="record")
+    schedule: Mapped["Schedule"] = relationship(back_populates="record")
 
 
 class Doctor_Schedule(db.Model):
     __tablename__ = "doctor_schedule"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    doctor_schedule_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
-    vacant_date: Mapped[str] = mapped_column(String(10))
-    vacant_time: Mapped[str] = mapped_column(String(10))
+    vacant_date: Mapped[str] = mapped_column(String(20))
+    vacant_time: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20))
 
-    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule")
+    doctor = relationship("Doctor", back_populates="schedules")
+    schedules: Mapped[list["Schedule"]] = relationship(back_populates="doctor_schedule")
 
 
 class Schedule(db.Model):
@@ -110,11 +113,12 @@ class Schedule(db.Model):
 
     schedule_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
-    id: Mapped[int] = mapped_column(ForeignKey("doctor_schedule.id"))
+    doctor_schedule_id: Mapped[int] = mapped_column(ForeignKey("doctor_schedule.doctor_schedule_id"))
     status: Mapped[str] = mapped_column(String(20))
     timestamp: Mapped[str] = mapped_column(TIMESTAMP)
 
-    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule")
+    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule", uselist=False)
+    doctor_schedule: Mapped["Doctor_Schedule"] = relationship(back_populates="schedules")
 
 class Service(db.Model):
     __tablename__ = "service"
@@ -252,7 +256,11 @@ def login():
                 return redirect(url_for('doctor_dashboard'))
             elif role == 'patient':
                 flash('Logged in successfully.', 'success')
-                return redirect(url_for('create_profile'))
+                patient_profile = db.session.query(Patient).filter_by(account_id=user.account_id).first()
+                if patient_profile:
+                    return redirect(url_for('patient_dashboard'))
+                else:
+                    return redirect(url_for('create_profile')) 
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
             return render_template('login.html')
@@ -294,11 +302,12 @@ def admin_doctors():
 
 @app.route('/patients_list')
 def patients_list():
-    return render_template('admin/patients_list.html')
+    patients = Patient.query.all()
+    return render_template('admin/patients_list.html', patients=patients)
 
 @app.route('/add_doctor', methods=['GET', 'POST'])
 def add_doctor():
-    accounts = Account.query.all()
+    accounts = db.session.query(Doctor.account_id).filter(Account.role == 'doctor')
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -382,23 +391,87 @@ def create_doctor_account():
 def doctor_dashboard():
     if 'role' not in session or session['role'] != 'doctor':
         return redirect(url_for('unauthorized'))
-    return render_template('doctor_dashboard.html')
-
-@app.route('/patient/dashboard')
-def patient_dashboard():
-    return render_template('patient/patient_dashboard.html')
-
-@app.route('/available_doctors')
-def available_doctors():
-    return render_template('patient/available_doctors.html')
+    return render_template('doctor/doctor_dashboard.html')
 
 @app.route('/doctors')
 def doctors():
     return render_template('doctors.html')
 
+@app.route('/doctors/patients')
+def doctors_patient():
+    return render_template('doctor/doctor_patients.html')
+
+@app.route('/doctors/appointment')  
+def doctors_appointment():
+    appointments = Appointment.query.all()
+    return render_template('doctor/doctor_appointment.html', appointments=appointments)
+
+@app.route('/doctors/schedule', methods=['GET', 'POST'])
+def doctors_schedule():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        doctor_id = session.get('user_id')
+        preferred_date = request.form['preferred_date']
+        preferred_time = request.form['preferred_time']
+        status = 'Available'
+
+        new_schedule = Doctor_Schedule(doctor_id=doctor_id, vacant_date=preferred_date, vacant_time=preferred_time, status=status)
+        db.session.add(new_schedule)
+        db.session.commit()
+        return redirect(url_for('doctors_schedule'))
+    
+    schedules = Doctor_Schedule.query.filter_by(doctor_id=user_id).all()
+
+    return render_template('doctor/open_schedule.html', schedules=schedules)
+
+@app.route('/doctors/profile')
+def doctors_profile():
+    return render_template('doctor/doctor_profile.html')
+
+@app.route('/doctors/accept_appointment/<int:appointment_id>', methods=['POST'])
+def accept_appointment(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+    if not appointment:
+        return redirect(url_for('doctors_appointment'))
+    appointment.status = 'Accepted'
+    db.session.commit()
+    return redirect(url_for('doctors_appointment'))
+
+@app.route('/doctors/reject_appointment/<int:appointment_id>', methods=['POST'])
+def reject_appointment(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+    if not appointment:
+        return redirect(url_for('doctors_appointment'))
+    appointment.status = 'Rejected'
+    db.session.commit()
+    return redirect(url_for('doctors_appointment'))
+
+@app.route('/doctors/delete_schedule/<int:doctor_schedule_id>', methods=['POST'])
+def delete_doctor_schedule(doctor_schedule_id):
+    schedule = Doctor_Schedule.query.get(doctor_schedule_id)
+    if not schedule:
+        return redirect(url_for('doctors_schedule'))
+    db.session.delete(schedule)
+    db.session.commit()
+    return redirect(url_for('doctors_schedule'))
+
 @app.route('/patients')
 def patients():
-    return render_template('patients.html')
+    return render_template('admin/patients.html')
+
+@app.route('/patient/dashboard')
+def patient_dashboard():
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
+    return render_template('patient/patient_dashboard.html')
+
+@app.route('/available_doctors')
+def available_doctors():
+    doctors = Doctor.query.all()
+    return render_template('patient/available_doctors.html', doctors=doctors)
 
 @app.route('/create_profile', methods=['GET', 'POST'])
 def create_profile():
@@ -440,12 +513,20 @@ def patient_profile():
 @app.route('/appointments')
 def appointments():
     return render_template('appointments.html')
+
 @app.route('/patient/appointment', methods=['GET', 'POST'])
 def patient_appointment():
-    if 'patient_id' not in session:
-        return redirect('/patient/login')
+    appointments = Appointment.query.filter_by(patient_id=session.get('user_id')).all()
 
-    patient_id = session['patient_id']
+    return render_template('patient/patient_appointment.html', appointments=appointments)
+
+
+@app.route('/create_appointment', methods=['GET', 'POST'])
+def create_appointment():
+
+    doctors = Doctor.query.all()
+
+    user_id = session.get('user_id')
 
     if request.method == 'POST':
         appointment_date = request.form['preferred_date']
@@ -454,7 +535,7 @@ def patient_appointment():
         status = 'Pending'
 
         new_appointment = Appointment(
-            patient_id=patient_id,
+            patient_id=user_id,
             doctor_id=doctor_id,
             appointment_date=appointment_date,
             appointment_time=appointment_time,
@@ -464,11 +545,9 @@ def patient_appointment():
         db.session.add(new_appointment)
         db.session.commit()
 
-        return redirect(url_for('patient_dashboard'))
-
-    doctors = Doctor.query.all()
-
-    return render_template('patient_appointment.html', doctors=doctors)
+        return redirect(url_for('create_appointment'))
+    
+    return render_template('patient/create_appointment.html', doctors=doctors)
 
 @app.route('/reports')
 def reports():

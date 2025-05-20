@@ -12,7 +12,7 @@
                 </a>
             </div>
         <div class="flex justify-between mb-4 align-center">
-            <h1 class="text-2xl font-bold text-blue-700">My Appointments</h1>
+            <h1 class="text-2xl font-bold text-blue-700">My Appointment Requests</h1>
         </div>
         <div class="flex flex-col">
             <div class="overflow-x-auto">
@@ -21,21 +21,21 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 text-center align-center">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Date</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Time</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Patient</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Doctor</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Date</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Time</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Status</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Doctor</th>
                                 </tr>
                             </thead>
                             <tbody  class="bg-white divide-y divide-gray-200">
+                                {% for appointment in appointments %}
                                 <tr>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08/01/2023</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">08:00 AM</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">John Paul Mark Salugta</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">active 30min ago</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">Dr. Jp Salugta</th>
+                                    <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.appointment_date }}</td>
+                                    <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.appointment_time }}</td>
+                                    <td class="py-2 text-center text-sm font-medium bg-green-100 text-green-800 text-xs rounded-full">{{ appointment.status }}</td>
+                                    <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.doctor.firstname }} {{ appointment.doctor.lastname }}</td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

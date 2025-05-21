@@ -19,6 +19,11 @@
             <div class="overflow-x-auto">
                 <div class="p-1.5 w-full inline-block align-middle">
                     <div class="overflow-hidden border rounded-lg">
+                        <div class="columns">
+                            <div class="column is-one-third is-offset-one-third">
+                                <input type="text" class="input" placeholder="Search" name="q" hx-get="/search" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                            </div>
+                        </div>
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -28,7 +33,7 @@
                                     <th scope="col" class="px-6 py-3 text-xs font-bold text-left text-gray-500 uppercase ">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 ">
+                            <tbody class="bg-white divide-y divide-gray-200 " id="results">
                                 {% for doctor in doctors %}
                                 <tr class="bg-white">
                                     <td class="px-6 py-4 text-sm font-medium text-gray-500 whitespace-nowrap">

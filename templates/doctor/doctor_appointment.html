@@ -36,12 +36,16 @@
                                     <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.patient.firstname }} {{ appointment.patient.lastname }}</th>
                                     <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.status }}</th>
                                     <td class="items-center justify-center inline-flex">
-                                        <form action="{{ url_for('accept_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
-                                            <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Accept</button>
-                                        </form>
-                                        <form action="{{ url_for('reject_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
-                                            <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Reject</button>
-                                        </form>
+                                        {% if appointment.status != 'Accepted' and appointment.status != 'Rejected' %}
+                                            <form action="{{ url_for('accept_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                                <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Accept</button>
+                                            </form>
+                                            <form action="{{ url_for('reject_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
+                                                <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Reject</button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-gray-500 text-center italic m-4">{{ appointment.status | capitalize }}</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

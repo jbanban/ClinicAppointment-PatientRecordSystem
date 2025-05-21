@@ -60,7 +60,7 @@ class Doctor(db.Model):
     account: Mapped["Account"] = relationship(back_populates="doctor")
     appointments: Mapped[list["Appointment"]] = relationship(back_populates="doctor")
     records: Mapped[list["MedicalRecord"]] = relationship(back_populates="doctor")
-    schedules = relationship("Doctor_Schedule", back_populates="doctor")
+    doctor_schedule = relationship("Doctor_Schedule", back_populates="doctor")
 
 
 
@@ -85,14 +85,14 @@ class MedicalRecord(db.Model):
     record_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
-    schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.schedule_id"))
+    schedule_id: Mapped[int] = mapped_column(ForeignKey("doctor_schedule.doctor_schedule_id"))
     visit_date: Mapped[str] = mapped_column(String(10))
     diagnosis: Mapped[str] = mapped_column(String)
     notes: Mapped[str] = mapped_column(String)
 
     patient: Mapped["Patient"] = relationship(back_populates="records")
     doctor: Mapped["Doctor"] = relationship(back_populates="records")
-    schedule: Mapped["Schedule"] = relationship(back_populates="record")
+    doctor_schedule: Mapped["Doctor_Schedule"] = relationship(back_populates="record")
 
 
 class Doctor_Schedule(db.Model):
@@ -104,21 +104,9 @@ class Doctor_Schedule(db.Model):
     vacant_time: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20))
 
-    doctor = relationship("Doctor", back_populates="schedules")
-    schedules: Mapped[list["Schedule"]] = relationship(back_populates="doctor_schedule")
+    doctor = relationship("Doctor", back_populates="doctor_schedule")
+    record = relationship("MedicalRecord", back_populates="doctor_schedule")
 
-
-class Schedule(db.Model):
-    __tablename__ = "schedule"
-
-    schedule_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
-    doctor_schedule_id: Mapped[int] = mapped_column(ForeignKey("doctor_schedule.doctor_schedule_id"))
-    status: Mapped[str] = mapped_column(String(20))
-    timestamp: Mapped[str] = mapped_column(TIMESTAMP)
-
-    record: Mapped["MedicalRecord"] = relationship(back_populates="schedule", uselist=False)
-    doctor_schedule: Mapped["Doctor_Schedule"] = relationship(back_populates="schedules")
 
 class Service(db.Model):
     __tablename__ = "service"
@@ -307,7 +295,12 @@ def patients_list():
 
 @app.route('/add_doctor', methods=['GET', 'POST'])
 def add_doctor():
-    accounts = db.session.query(Doctor.account_id).filter(Account.role == 'doctor')
+    accounts = (
+    db.session.query(Account)
+    .outerjoin(Doctor, Doctor.account_id == Account.account_id)
+    .filter(Account.role == 'doctor', Doctor.account_id.is_(None))
+    .all()
+    )
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -350,11 +343,14 @@ def add_doctor():
                         )
         db.session.add(new_doctor)
         db.session.commit()
+
+        return redirect(url_for('admin_doctors'))
     return render_template('admin/add_doctor.html', accounts=accounts)
 
 @app.route('/admin_appointments')
 def admin_appointments():
-    return render_template('admin/admin_appointments.html')
+    appointments = Appointment.query.all()
+    return render_template('admin/admin_appointments.html', appointments=appointments)  
 
 @app.route('/admin_reports')
 def admin_reports():
@@ -403,7 +399,14 @@ def doctors_patient():
 
 @app.route('/doctors/appointment')  
 def doctors_appointment():
-    appointments = Appointment.query.all()
+    user_id = session.get('user_id')
+
+    appointments = db.session.query(Appointment).\
+        join(Doctor, Appointment.doctor_id == Doctor.doctor_id).\
+        join(Account, Doctor.account_id == Account.account_id).\
+        filter(Account.account_id == user_id).\
+        all()
+
     return render_template('doctor/doctor_appointment.html', appointments=appointments)
 
 @app.route('/doctors/schedule', methods=['GET', 'POST'])
@@ -427,6 +430,12 @@ def doctors_schedule():
 
     return render_template('doctor/open_schedule.html', schedules=schedules)
 
+@app.route('/available_doctors')
+def available_doctors():
+    doctors = Doctor.query.all()
+    return render_template('patient/available_doctors.html', doctors=doctors)
+
+
 @app.route('/doctors/profile')
 def doctors_profile():
     return render_template('doctor/doctor_profile.html')
@@ -449,6 +458,15 @@ def reject_appointment(appointment_id):
     db.session.commit()
     return redirect(url_for('doctors_appointment'))
 
+@app.route('/doctors/done_appointment/<int:appointment_id>', methods=['POST'])
+def done_appointment(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+    if not appointment:
+        return redirect(url_for('doctors_appointment'))
+    appointment.status = 'Done'
+    db.session.commit()
+    return redirect(url_for('doctors_appointment'))
+
 @app.route('/doctors/delete_schedule/<int:doctor_schedule_id>', methods=['POST'])
 def delete_doctor_schedule(doctor_schedule_id):
     schedule = Doctor_Schedule.query.get(doctor_schedule_id)
@@ -467,11 +485,6 @@ def patient_dashboard():
     if 'role' not in session or session['role'] != 'patient':
         return redirect(url_for('unauthorized'))
     return render_template('patient/patient_dashboard.html')
-
-@app.route('/available_doctors')
-def available_doctors():
-    doctors = Doctor.query.all()
-    return render_template('patient/available_doctors.html', doctors=doctors)
 
 @app.route('/create_profile', methods=['GET', 'POST'])
 def create_profile():
@@ -520,6 +533,44 @@ def patient_appointment():
 
     return render_template('patient/patient_appointment.html', appointments=appointments)
 
+@app.route('/doctors/view_available/time_for_<int:doctor_id>')
+def view_available_time(doctor_id):
+    schedules = Doctor_Schedule.query.filter_by(doctor_id=doctor_id).all()
+    return render_template('patient/view_available_time.html', schedules=schedules)
+
+@app.route('/book_appointment/<int:doctor_schedule_id>', methods=['GET', 'POST'])
+def book_appointment(doctor_schedule_id):
+    user_id = session.get('user_id')
+    schedule = Doctor_Schedule.query.get(doctor_schedule_id)
+
+    if not schedule:
+        flash('Schedule not found.', 'error')
+        return redirect(url_for('patient_appointment'))
+
+    if request.method == 'POST':
+        preferred_date = request.form['vacant_date']
+        preferred_time = request.form['vacant_time']
+        doctor_id = request.form['doctor_id']
+        status = 'Pending'
+
+        # Create appointment
+        new_appointment = Appointment(
+            patient_id=user_id,
+            doctor_id=doctor_id,
+            appointment_date=preferred_date,
+            appointment_time=preferred_time,
+            status=status
+        )
+        db.session.add(new_appointment)
+
+        schedule.status = 'Booked'
+        print("Before Commit:", schedule.status)
+        db.session.commit()
+        print("Before Commit:", schedule.status)
+        flash('Appointment booked successfully!', 'success')
+        return redirect(url_for('patient_appointment'))
+
+    return render_template('patient/book_appointment.html')
 
 @app.route('/create_appointment', methods=['GET', 'POST'])
 def create_appointment():
@@ -565,6 +616,19 @@ def unauthorized():
 def profile(user_id):
     user = User.query.get(user_id)
     return render_template('profile.html',user=user)
+
+@app.route("/search")
+def search():
+    q = request.args.get("q")
+    print(q)
+
+    if q:
+        results = Doctor.query.filter(Doctor.firstname.icontains(q) | Doctor.lastname.icontains(q)) \
+        .order_by(Doctor.specialization.asc()).limit(100).all()
+    else:
+        results = []
+
+    return render_template("search_results.html", results=results)
 
 @app.route('/logout')
 def logout():

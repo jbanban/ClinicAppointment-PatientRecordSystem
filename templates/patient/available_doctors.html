@@ -39,7 +39,7 @@
                                         {{ doctor.phone }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-center text-gray-800 whitespace-nowrap">
-                                        <a href="#" class="text-blue-600 m-4">View</a>
+                                        <a href="{{ url_for('view_available_time', doctor_id=doctor.doctor_id)}}" class="text-blue-600 m-4">View Available Time</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

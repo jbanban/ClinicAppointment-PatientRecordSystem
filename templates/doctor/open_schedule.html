@@ -25,6 +25,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     {% for schedule in schedules %}
+                                         {% if loop.index0 < 10 %}
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="py-3 px-2 text-gray-800">{{ schedule.vacant_date }}</td>
                                         <td class="py-3 px-2 text-gray-800">{{ schedule.vacant_time }}</td>
@@ -39,6 +40,7 @@
                                             </form>
                                         </td>
                                     </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>

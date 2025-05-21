@@ -1,0 +1,51 @@
+{% extends 'base/layout.html' %}
+{% block title %}Doctors | Fernandez Dental Clinic{% endblock %}
+{% block content %}
+<div class="flex h-screen">
+    {% include 'doctor/doctor_sidebar.html' %}
+
+    <!-- Main Appointments Content -->
+    <div class="flex-1 p-6">
+        <div class="flex justify-end gap-2 mb-12">
+                <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                    <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
+                </a>
+            </div>
+        <div class="flex justify-between mb-4 align-center">
+            <h1 class="text-2xl font-bold text-blue-700">My Patients</h1>
+        </div>
+        <div class="flex flex-col">
+            <div class="overflow-x-auto">
+                <div class="p-1.5 w-full inline-block align-middle">
+                    <div class="overflow-hidden border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 text-center align-center">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Patient Name</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Schedule</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-xs font-bold text-gray-500 uppercase ">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody  class="bg-white divide-y divide-gray-200">
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.patient.firstname }} {{ appointment.patient.lastname }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.appointment_date }} {{ appointment.appointment_time }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.status }}</th>
+                                    <td class="items-center justify-center inline-flex">
+                                        <form action="{{ url_for('done_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                            <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Done</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

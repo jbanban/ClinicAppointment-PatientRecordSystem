@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Appointment Calendar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-4xl bg-white rounded-xl shadow p-6">
+    <h2 class="text-2xl font-bold mb-4">Book an Appointment</h2>
+
+    <!-- Calendar -->
+    <div class="grid grid-cols-7 gap-2 text-center text-sm font-medium text-gray-700 mb-1">
+      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+    <div id="calendar" class="grid grid-cols-7 gap-2 mb-4">
+      <!-- Calendar days will be populated by JS -->
+    </div>
+
+    <!-- Time Slots -->
+    <div id="time-slots" class="hidden">
+      <h3 class="text-xl font-semibold mb-2">Available Time Slots for <span id="selected-date"></span>:</h3>
+      <div id="slots" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        <!-- Time slots will appear here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const timeSlotsSection = document.getElementById('time-slots');
+    const selectedDateText = document.getElementById('selected-date');
+    const slotsContainer = document.getElementById('slots');
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    // Dummy available time slots by date (use Flask or API in real app)
+    const availableTimes = {
+      '{{ schedule.vacant_date }}': ['{{ schedule.vacant_time }}'],
+    };
+
+    function createCalendar(year, month) {
+      const firstDay = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        calendar.appendChild(empty);
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = date.toLocaleDateString('en-CA');
+
+
+        const btn = document.createElement('button');
+        btn.textContent = day;
+        btn.className = "rounded-lg bg-blue-100 hover:bg-blue-300 p-2 font-medium";
+        btn.onclick = () => showSlots(dateStr);
+        calendar.appendChild(btn);
+      }
+    }
+
+    function showSlots(dateStr) {
+      selectedDateText.textContent = dateStr;
+      slotsContainer.innerHTML = '';
+
+      const slots = availableTimes[dateStr] || [];
+
+      if (slots.length === 0) {
+        slotsContainer.innerHTML = '<p class="text-gray-500 col-span-full">No available times.</p>';
+      } else {
+        slots.forEach(time => {
+          const slotBtn = document.createElement('button');
+          slotBtn.textContent = time;
+          slotBtn.className = "bg-green-100 hover:bg-green-300 rounded-lg p-2 text-sm font-medium";
+          slotBtn.onclick = () => alert(`You selected ${dateStr} at ${time}`);
+          slotsContainer.appendChild(slotBtn);
+        });
+      }
+
+      timeSlotsSection.classList.remove('hidden');
+    }
+
+    createCalendar(year, month);
+  </script>
+</body>
+</html>

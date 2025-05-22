@@ -424,7 +424,10 @@ def doctors_schedule():
         preferred_time = request.form['preferred_time']
         status = 'Available'
 
-        new_schedule = Doctor_Schedule(doctor_id=doctor_id, vacant_date=preferred_date, vacant_time=preferred_time, status=status)
+        new_schedule = Doctor_Schedule(doctor_id=doctor_id, 
+                                       vacant_date=preferred_date,
+                                       vacant_time=preferred_time, 
+                                       status=status)
         db.session.add(new_schedule)
         db.session.commit()
         return redirect(url_for('doctors_schedule'))

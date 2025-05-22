@@ -33,17 +33,27 @@
                                         {{ schedule.vacant_time }}
                                     </td>
                                     <td class="py-3 px-2">
+                                        {% if schedule.status != 'Booked' %}
                                         <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                                             {{ schedule.status }}
                                         </span>
+                                        {% else %}
+                                        <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                            {{ schedule.status }}
+                                        </span>
+                                        {% endif %}
                                     </td>
                                     <td class="py-3 px-2 text-center">
+                                        {% if schedule.status != 'Booked' %}
                                         <form action="{{ url_for('book_appointment', doctor_schedule_id=schedule.doctor_schedule_id) }}" method="POST" class="text-green-600" onsubmit="return confirm('Are you sure you want to Book this schedule?');">
                                             <input type="hidden" name="vacant_date" value="{{ schedule.vacant_date }}"> 
                                             <input type="hidden" name="vacant_time" value="{{ schedule.vacant_time }}">
                                             <input type="hidden" name="doctor_id" value="{{ schedule.doctor_id }}">
-                                            <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Book</button>
+                                            <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Book</button>
                                         </form>
+                                        {% else %}
+                                        <span class="text-blue-600">Booked</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                     {% endif %}

@@ -233,12 +233,15 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        role = request.form['role']
+        
         user = Account.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.account_id
             session['role'] = user.role
+
+            role = session['role'] 
+
             if role == 'doctor':
                 flash('Logged in successfully.', 'success')
                 return redirect(url_for('doctor_dashboard'))

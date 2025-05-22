@@ -1,5 +1,5 @@
 {% extends 'base/layout.html' %}
-{% block title %}Doctors | Fernandez Dental Clinic{% endblock %}
+{% block title %}Doctors | Fernandez Clinic{% endblock %}
 {% block content %}
 <div class="flex h-screen">
     {% include 'patient/patient_sidebar.html' %}
@@ -25,6 +25,7 @@
                                     <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Time</th>
                                     <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Status</th>
                                     <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Doctor</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center text-xs font-bold text-gray-500 uppercase ">Action</th>
                                 </tr>
                             </thead>
                             <tbody  class="bg-white divide-y divide-gray-200">
@@ -34,6 +35,22 @@
                                     <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.appointment_time }}</td>
                                     <td class="py-2 text-center text-sm font-medium bg-green-100 text-green-800 text-xs rounded-full">{{ appointment.status }}</td>
                                     <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.doctor.firstname }} {{ appointment.doctor.lastname }}</td>
+                                    <td class="flex text-center text-sm font-medium text-gray-800 mb-2">
+                                        {% if appointment.status != 'Accepted' and appointment.status != 'Rejected' %}
+                                            {% if appointment.status == 'Pending' %}
+                                            <!-- <form action="{{ url_for('reschedule_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                                <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Reschedule</button>
+                                            </form> -->
+                                            <form action="{{ url_for('cancel_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
+                                                <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Cancel</button>
+                                            </form>
+                                            {% else %}
+                                                <span class="text-gray-500 text-center italic m-4">{{ appointment.status | capitalize }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-500 text-center italic m-4">{{ appointment.status | capitalize }}</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

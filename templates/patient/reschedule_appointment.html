@@ -1,17 +1,17 @@
 {% extends 'base/layout.html' %}
 {% block title %}Schedule Appointment | Fernandez Clinic{% endblock %}
 {% block content %}
-<body class="min-h-screen bg-gray-100 flex">
+<div class="min-h-screen bg-gray-100 flex">
     {% include 'patient/patient_sidebar.html' %}
     <div class="flex-1 overflow-y-auto px-4 py-8 max-w-2xl mx-auto px-4"> 
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6 text-center">
                 <h1 class="text-2xl font-bold text-white mb-2">Schedule an Appointment</h1>
-                <p class="text-blue-100">Choose your preferred date, time, and doctor</p>
+                <p class="text-blue-100">Set your New Preferred Date and Time</p>
             </div>
 
             <div class="p-8">
-                <form method="POST" class="space-y-6">
+                <form action="{{ url_for('reschedule_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="space-y-6">
                     <div class="flex flex-col md:flex-row md:items-end gap-4"> 
                         <div class="flex-1">
                             <label for="preferred_date" class="block text-sm font-medium text-gray-700 mb-2">
@@ -40,42 +40,12 @@
                         </div>
                     </div>
 
-                    <div class="flex-1">
-                        <label for="doctor_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            Select Doctor
-                        </label>
-                        <select
-                            name="doctor_id"
-                            id="doctor_id"
-                            required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-white"
-                        >
-                            <option disabled selected>-- Select a doctor --</option>
-                            {% for doctor in doctors %}
-                                <option value="{{ doctor.doctor_id }}">{{ doctor.firstname }} {{ doctor.lastname }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                            Additional Notes <span class="text-gray-400">(Optional)</span>
-                        </label>
-                        <textarea
-                            name="notes"
-                            id="notes"
-                            rows="3"
-                            placeholder="Any specific concerns or requests..."
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 resize-none"
-                        ></textarea>
-                    </div>
-
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 pt-4">
                         <button
                             type="submit"
                             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition duration-200 transform hover:scale-105 focus:ring-4 focus:ring-blue-200 focus:outline-none"
                         >
-                            Book Appointment
+                            Save Changes
                         </button>
                     </div>
                 </form>
@@ -84,9 +54,8 @@
 
         <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
             <h3 class="font-medium text-gray-800 mb-3">📋 Before Your Appointment</h3>
-            {# Changed to flex wrap to keep items inlined as much as possible #}
             <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
-                <div class="flex items-start whitespace-nowrap"> {# Prevent wrapping for each item #}
+                <div class="flex items-start whitespace-nowrap"> 
                     <span class="text-blue-500 mr-2">•</span>
                     Arrive 15 minutes early for check-in
                 </div>
@@ -105,5 +74,5 @@
             </div>
         </div>
     </div>
-</body>
+</div>
 {% endblock %}

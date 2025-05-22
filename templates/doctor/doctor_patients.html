@@ -1,5 +1,5 @@
 {% extends 'base/layout.html' %}
-{% block title %}Doctors | Fernandez Dental Clinic{% endblock %}
+{% block title %}Doctors | Fernandez Clinic{% endblock %}
 {% block content %}
 <div class="flex h-screen">
     {% include 'doctor/doctor_sidebar.html' %}
@@ -28,13 +28,13 @@
                                 </tr>
                             </thead>
                             <tbody  class="bg-white divide-y divide-gray-200">
-                                {% for appointment in appointments %}
+                                {% for patient in patient %}
                                 <tr>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.patient.firstname }} {{ appointment.patient.lastname }}</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.appointment_date }} {{ appointment.appointment_time }}</th>
-                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ appointment.status }}</th>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ patient.firstname }} {{ patient.lastname }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ patient.appointment_date }} {{ patient.appointment_time }}</th>
+                                    <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ patient.status }}</th>
                                     <td class="items-center justify-center inline-flex">
-                                        <form action="{{ url_for('done_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                        <form action="{{ url_for('done_appointment',appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
                                             <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Done</button>
                                         </form>
                                     </td>

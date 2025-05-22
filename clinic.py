@@ -395,18 +395,21 @@ def doctors():
 
 @app.route('/doctors/patients')
 def doctors_patient():
-    return render_template('doctor/doctor_patients.html')
+    user_id = session.get('user_id')
+    
+    patients = db.session.query(Patient).join(Appointment).filter(Appointment.doctor_id == user_id,Appointment.status == 'Accepted').all()
+    return render_template('doctor/doctor_patients.html', patients=patients)
 
 @app.route('/doctors/appointment')  
 def doctors_appointment():
     user_id = session.get('user_id')
 
-    appointments = db.session.query(Appointment).\
-        join(Doctor, Appointment.doctor_id == Doctor.doctor_id).\
-        join(Account, Doctor.account_id == Account.account_id).\
-        filter(Account.account_id == user_id).\
-        all()
+    # appointments = db.session.query(Appointment).\
+    #     join(Doctor, Appointment.doctor_id == Doctor.doctor_id).\
+    #     join(Account, Doctor.account_id == Account.account_id).\
+    #     filter(Account.account_id == user_id).all()
 
+    appointments = Appointment.query.filter_by(doctor_id=user_id).all()
     return render_template('doctor/doctor_appointment.html', appointments=appointments)
 
 @app.route('/doctors/schedule', methods=['GET', 'POST'])
@@ -571,6 +574,39 @@ def book_appointment(doctor_schedule_id):
         return redirect(url_for('patient_appointment'))
 
     return render_template('patient/book_appointment.html')
+
+@app.route('/patient/reschedule_appointment/<int:appointment_id>', methods=['GET', 'POST'])
+def reschedule_appointment(appointment_id):
+    print("request is as follows = ",request.form)  # DEBUG: Print form content
+    appointment = Appointment.query.get_or_404(appointment_id)
+
+    if request.method == 'POST':
+        preferred_date = request.form['preferred_date']
+        preferred_time = request.form['preferred_time']
+
+        if not preferred_date or not preferred_time:
+            flash('Missing date or time.')
+            return redirect(reschedule_appointment(appointment_id))
+        
+        appointment.appointment_date = preferred_date
+        appointment.appointment_time = preferred_time
+        db.session.commit()
+
+        return redirect(url_for('patient_appointment'))
+
+    return render_template('patient/reschedule_appointment.html', appointment=appointment)
+
+@app.route('/patient/cancel_appointment/<int:appointment_id>', methods=['POST'])
+def cancel_appointment(appointment_id):
+    appointment = Appointment.query.get(appointment_id)
+
+    if not appointment:
+        return redirect(url_for('patient_appointment'))
+
+    appointment.status = 'Cancelled'
+    db.session.commit()
+
+    return redirect(url_for('patient_appointment'))
 
 @app.route('/create_appointment', methods=['GET', 'POST'])
 def create_appointment():

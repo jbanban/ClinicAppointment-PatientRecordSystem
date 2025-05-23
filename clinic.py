@@ -158,7 +158,6 @@ def calculate_appointment_statistics():
             'busiest_day_of_week': None
         }
 
-    # Combine date and time into a datetime object for analysis
     appointment_datetimes = np.array([
         datetime.strptime(f"{appt.appointment_date} {appt.appointment_time}", '%Y-%m-%d %H:%M')
         for appt in appointments
@@ -392,10 +391,6 @@ def doctor_dashboard():
         return redirect(url_for('unauthorized'))
     return render_template('doctor/doctor_dashboard.html')
 
-@app.route('/doctors')
-def doctors():
-    return render_template('doctors.html')
-
 @app.route('/doctors/patients')
 def doctors_patient():
     if 'role' not in session or session['role'] != 'doctor':
@@ -494,15 +489,21 @@ def delete_doctor_schedule(doctor_schedule_id):
     db.session.commit()
     return redirect(url_for('doctors_schedule'))
 
-@app.route('/patients')
-def patients():
-    return render_template('admin/patients.html')
+@app.route('/medical_records', methods=['GET','POST'])
+def medical_records():
+    pass
 
 @app.route('/patient/dashboard')
 def patient_dashboard():
     if 'role' not in session or session['role'] != 'patient':
         return redirect(url_for('unauthorized'))
-    return render_template('patient/patient_dashboard.html')
+    user_id = session.get('user_id')
+
+    profile = Patient.query.filter_by(account_id=user_id).first()
+    if not profile:
+        return redirect(url_for('create_profile'))
+    
+    return render_template('patient/patient_dashboard.html',profile=profile)
 
 @app.route('/create_profile', methods=['GET', 'POST'])
 def create_profile():
@@ -540,10 +541,6 @@ def patient_profile():
         return redirect(url_for('create_profile'))
     
     return render_template('patient/patient_profile.html', profile=profile)
-
-@app.route('/appointments')
-def appointments():
-    return render_template('appointments.html')
 
 @app.route('/patient/appointment', methods=['GET', 'POST'])
 def patient_appointment():

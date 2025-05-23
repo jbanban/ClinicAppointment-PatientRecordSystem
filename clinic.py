@@ -571,6 +571,7 @@ def book_appointment(doctor_schedule_id):
         return redirect(url_for('patient_appointment'))
 
     if request.method == 'POST':
+        patient_id = user_id
         preferred_date = request.form['vacant_date']
         preferred_time = request.form['vacant_time']
         doctor_id = request.form['doctor_id']
@@ -578,7 +579,7 @@ def book_appointment(doctor_schedule_id):
 
         # Create appointment
         new_appointment = Appointment(
-            patient_id=user_id,
+            patient_id=patient_id,
             doctor_id=doctor_id,
             appointment_date=preferred_date,
             appointment_time=preferred_time,

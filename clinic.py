@@ -398,6 +398,8 @@ def doctors():
 
 @app.route('/doctors/patients')
 def doctors_patient():
+    if 'role' not in session or session['role'] != 'doctor':
+        return redirect(url_for('unauthorized'))
     user_id = session.get('user_id')
     
     patients = db.session.query(Patient).join(Appointment).filter(Appointment.doctor_id == user_id,Appointment.status == 'Accepted').all()
@@ -405,6 +407,8 @@ def doctors_patient():
 
 @app.route('/doctors/appointment')  
 def doctors_appointment():
+    if 'role' not in session or session['role'] != 'doctor':
+        return redirect(url_for('unauthorized'))
     user_id = session.get('user_id')
 
     # appointments = db.session.query(Appointment).\
@@ -417,6 +421,8 @@ def doctors_appointment():
 
 @app.route('/doctors/schedule', methods=['GET', 'POST'])
 def doctors_schedule():
+    if 'role' not in session or session['role'] != 'doctor':
+        return redirect(url_for('unauthorized'))
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
@@ -444,10 +450,13 @@ def available_doctors():
     doctors = Doctor.query.all()
     return render_template('patient/available_doctors.html', doctors=doctors)
 
-
 @app.route('/doctors/profile')
 def doctors_profile():
-    return render_template('doctor/doctor_profile.html')
+    if 'role' not in session or session['role'] != 'doctor':
+        return redirect(url_for('unauthorized'))
+    user_id = session.get('user_id')
+    doctor = Doctor.query.filter_by(account_id=user_id).first()
+    return render_template('doctor/doctor_profile.html', doctor=doctor)
 
 @app.route('/doctors/accept_appointment/<int:appointment_id>', methods=['POST'])
 def accept_appointment(appointment_id):
@@ -538,17 +547,23 @@ def appointments():
 
 @app.route('/patient/appointment', methods=['GET', 'POST'])
 def patient_appointment():
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
     appointments = Appointment.query.filter_by(patient_id=session.get('user_id')).all()
 
     return render_template('patient/patient_appointment.html', appointments=appointments)
 
 @app.route('/doctors/view_available/time_for_<int:doctor_id>')
 def view_available_time(doctor_id):
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
     schedules = Doctor_Schedule.query.filter_by(doctor_id=doctor_id).all()
     return render_template('patient/view_available_time.html', schedules=schedules)
 
 @app.route('/book_appointment/<int:doctor_schedule_id>', methods=['GET', 'POST'])
 def book_appointment(doctor_schedule_id):
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
     user_id = session.get('user_id')
     schedule = Doctor_Schedule.query.get(doctor_schedule_id)
 
@@ -583,6 +598,8 @@ def book_appointment(doctor_schedule_id):
 
 @app.route('/patient/reschedule_appointment/<int:appointment_id>', methods=['GET', 'POST'])
 def reschedule_appointment(appointment_id):
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
     print("request is as follows = ",request.form)  # DEBUG: Print form content
     appointment = Appointment.query.get_or_404(appointment_id)
 
@@ -616,7 +633,8 @@ def cancel_appointment(appointment_id):
 
 @app.route('/create_appointment', methods=['GET', 'POST'])
 def create_appointment():
-
+    if 'role' not in session or session['role'] != 'patient':
+        return redirect(url_for('unauthorized'))
     doctors = Doctor.query.all()
 
     user_id = session.get('user_id')

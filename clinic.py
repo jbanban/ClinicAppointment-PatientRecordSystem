@@ -503,7 +503,9 @@ def patient_dashboard():
     if not profile:
         return redirect(url_for('create_profile'))
     
-    return render_template('patient/patient_dashboard.html',profile=profile)
+    appointments = Appointment.query.filter_by(patient_id=user_id).all()
+
+    return render_template('patient/patient_dashboard.html',profile=profile, appointments=appointments)
 
 @app.route('/create_profile', methods=['GET', 'POST'])
 def create_profile():

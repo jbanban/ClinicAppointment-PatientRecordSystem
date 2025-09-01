@@ -260,25 +260,30 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
         role = request.form.get('role', 'patient')
+
+        if password != confirm_password:
+            flash("Passwords do not match!", "danger")
+            return redirect(url_for('register'))
 
         existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
             flash("Email already exists!", "danger")
             return redirect(url_for('register'))
 
-        hashed_pw = generate_password_hash(password)
-        new_account = Account(email=email,password=hashed_pw, role=role)
+        hashed_pw = generate_password_hash(password, method='scrypt')
+        new_account = Account(email=email, password=hashed_pw, role=role)
 
         db.session.add(new_account)
         db.session.commit()
 
+        flash("Account created successfully!", "success")
         return redirect(url_for('login'))
 
     return render_template('register.html')
-
 
 @app.route('/admin/dashboard')
 def admin_dashboard():

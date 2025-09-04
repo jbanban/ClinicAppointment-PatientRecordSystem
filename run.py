@@ -1,4 +1,3 @@
-# wsgi.py
 from DAS import appointment
 
 app = appointment()

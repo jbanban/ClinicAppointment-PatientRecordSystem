@@ -1,14 +1,14 @@
-from numpy import np
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from collections import Counter
 from functools import wraps
-from datetime import datetime
 from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import db, Appointment, Doctor, User, Account, Patient, Doctor_Schedule
+# from datetime import datetime
+# from collections import Counter
 
-abp = Blueprint("main", __name__)
+from .models import db, Appointment, Doctor, User, Account, Patient, Doctor_Schedule
+
+abp = Blueprint("abp", __name__)
 
 def role_required(*roles):
     def wrapper(fn):
@@ -22,70 +22,82 @@ def role_required(*roles):
         return decorated_view
     return wrapper
 
-def calculate_appointment_statistics():
-    appointments = db.session.query(Appointment).all()
+# def calculate_appointment_statistics():
+#     appointments = db.session.query(Appointment).all()
 
-    if not appointments:
-        return {
-            'total_appointments': 0,
-            'monthly_counts': {},
-            'status_counts': {},
-            'average_appointments_per_day': 0,
-            'busiest_day_of_week': None
-        }
+#     if not appointments:
+#         return {
+#             'total_appointments': 0,
+#             'monthly_counts': {},
+#             'status_counts': {},
+#             'average_appointments_per_day': 0,
+#             'busiest_day_of_week': None
+#         }
 
-    appointment_datetimes = np.array([
-        datetime.strptime(f"{appt.appointment_date} {appt.appointment_time}", '%Y-%m-%d %H:%M')
-        for appt in appointments
-    ])
+#     appointment_datetimes = np.array([
+#         datetime.strptime(f"{appt.appointment_date} {appt.appointment_time}", '%Y-%m-%d %H:%M')
+#         for appt in appointments
+#     ])
 
-    # Total number of appointments
-    total_appointments = len(appointments)
+#     # Total number of appointments
+#     total_appointments = len(appointments)
 
-    # Monthly appointment counts
-    months = [date.strftime('%Y-%m') for date in appointment_datetimes]
-    monthly_counts = Counter(months)
+#     # Monthly appointment counts
+#     months = [date.strftime('%Y-%m') for date in appointment_datetimes]
+#     monthly_counts = Counter(months)
 
-    # Appointment status counts
-    statuses = [appt.status for appt in appointments]
-    status_counts = Counter(statuses)
+#     # Appointment status counts
+#     statuses = [appt.status for appt in appointments]
+#     status_counts = Counter(statuses)
 
-    # Average appointments per day
-    if appointment_datetimes.size > 0:
-        unique_days = np.unique(appointment_datetimes.astype('datetime64[D]'))
-        average_appointments_per_day = total_appointments / len(unique_days)
-    else:
-        average_appointments_per_day = 0
+#     # Average appointments per day
+#     if appointment_datetimes.size > 0:
+#         unique_days = np.unique(appointment_datetimes.astype('datetime64[D]'))
+#         average_appointments_per_day = total_appointments / len(unique_days)
+#     else:
+#         average_appointments_per_day = 0
 
-    # Busiest day of the week
-    if appointment_datetimes.size > 0:
-        days_of_week = [date.strftime('%A') for date in appointment_datetimes]
-        day_counts = Counter(days_of_week)
-        busiest_day = day_counts.most_common(1)[0][0]
-    else:
-        busiest_day = None
+#     # Busiest day of the week
+#     if appointment_datetimes.size > 0:
+#         days_of_week = [date.strftime('%A') for date in appointment_datetimes]
+#         day_counts = Counter(days_of_week)
+#         busiest_day = day_counts.most_common(1)[0][0]
+#     else:
+#         busiest_day = None
 
-    return {
-        'total_appointments': total_appointments,
-        'monthly_counts': dict(monthly_counts),
-        'status_counts': dict(status_counts),
-        'average_appointments_per_day': round(average_appointments_per_day, 2),
-        'busiest_day_of_week': busiest_day
-    }
+#     return {
+#         'total_appointments': total_appointments,
+#         'monthly_counts': dict(monthly_counts),
+#         'status_counts': dict(status_counts),
+#         'average_appointments_per_day': round(average_appointments_per_day, 2),
+#         'busiest_day_of_week': busiest_day
+#     }
 
 @abp.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
+        
+        print(f"Login attempt - Username: {username}")
+        print(f"Password received: {'Yes' if password else 'No'}")
+        
         user = User.query.filter_by(username=username).first()
-
+        print(f"User found: {user is not None}")
+        
+        if user:
+            print(f"User ID: {user.id}")
+            print(f"Stored password hash: {user.password}")
+            password_check = check_password_hash(user.password, password)
+            print(f"Password check result: {password_check}")
+        
         if user and check_password_hash(user.password, password):
+            print("Password check passed")
             login_user(user)
             flash('Logged in successfully.', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
+            print("Login failed")
             flash('Login unsuccessful. Please check username and password.', 'danger')
 
     return render_template('admin/admin_login.html')
@@ -149,12 +161,12 @@ def register():
 
         if password != confirm_password:
             flash("Passwords do not match!", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('abp.register'))
 
         existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
             flash("Email already exists!", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('abp.register'))
 
         hashed_pw = generate_password_hash(password, method='scrypt')
         new_account = Account(email=email, password=hashed_pw, role=role)
@@ -163,16 +175,16 @@ def register():
         db.session.commit()
 
         flash("Account created successfully!", "success")
-        return redirect(url_for('login'))
+        return redirect(url_for('abp.login'))
 
-    return render_template('register.html')
+    return render_template('abp.register.html')
 
 @abp.route('/admin/dashboard')
 @login_required
 @role_required("admin")
 def admin_dashboard():
-    statistics = calculate_appointment_statistics()
-    return render_template('admin/admin_dashboard.html', statistics=statistics)
+    # statistics = calculate_appointment_statistics()
+    return render_template('admin/admin_dashboard.html')
 
 @abp.route('/admin_doctors')
 @login_required
@@ -278,7 +290,7 @@ def create_doctor_account():
         existing_user = Account.query.filter_by(email=email).first()
         if existing_user:
             flash("Email already exists!", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('abp.register'))
 
         hashed_pw = generate_password_hash(password)
         new_account = Account(email=email, password=hashed_pw, role=role)
@@ -655,4 +667,8 @@ def search():
 @abp.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('abp.login'))
+
+@abp.route('/.well-known/appspecific/com.chrome.devtools.json')
+def chrome_devtools_probe():
+    return {}, 200

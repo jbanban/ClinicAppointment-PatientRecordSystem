@@ -1,15 +1,13 @@
-from routes import abp
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, ForeignKey, TIMESTAMP
+from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-db = SQLAlchemy(abp)
+db = SQLAlchemy()
 
 
 class Base(DeclarativeBase):
     pass
-
 
 class Patient(db.Model):
     __tablename__ = "patient"
@@ -124,7 +122,7 @@ class Invoice(db.Model):
     service: Mapped["Service"] = relationship()
 
 
-class Account(db.Model):
+class Account(db.Model, UserMixin):
     __tablename__ = "account"
     account_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
@@ -134,9 +132,16 @@ class Account(db.Model):
     patient = relationship("Patient", back_populates="account", uselist=False)
     doctor = relationship("Doctor", back_populates="account", uselist=False)
 
+    def get_id(self):
+        return str(self.account_id)
+
 class User(db.Model, UserMixin):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True, autoincrement=True) 
     username: Mapped[str] = mapped_column(String(50), unique=True)
     password: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(20))
+
+    def get_id(self):
+        return str(self.id)
+    

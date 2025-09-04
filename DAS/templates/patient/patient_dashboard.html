@@ -11,31 +11,43 @@
     <div class="flex-1 flex flex-col">
       
         <!-- Header -->
-        <header class="bg-white shadow-sm border-b sticky top-0 z-40">
-            <div class="flex items-center justify-between px-6 py-4">
-                
-                <!-- Left Side (Logo or Menu Button) -->
-                <div class="flex items-center">
-                <!-- Mobile Menu Button -->
-                <button class="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100" id="menuToggle">
-                    <i class="fas fa-bars text-lg"></i>
-                </button>
-                </div>
-
-                <!-- Right Side (User Info) -->
-                <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center">
-                    <span class="text-white font-medium text-sm">
-                    {{ profile.firstname[0] if profile.firstname else 'U' }}
-                    </span>
-                </div>
-                <div class="hidden sm:block text-right">
-                    <p class="text-sm font-medium text-gray-800">{{ profile.firstname }} {{ profile.lastname }}</p>
-                    <p class="text-xs text-gray-500">Patient</p>
-                </div>
-                </div>
-
+        <header class="bg-white border-b shadow-sm sticky top-0 z-40">
+          <div class="flex items-center justify-between px-6 py-3">
+            
+            <!-- Left Side (Logo / Mobile Menu Button) -->
+            <div class="flex items-center space-x-3">
             </div>
+
+            <!-- Right Side (User Info + Dropdown) -->
+            <div class="relative">
+              <button class="flex items-center space-x-3 focus:outline-none group" id="userMenuBtn">
+                <div class="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span class="text-white font-medium text-sm">
+                    {{ profile.firstname[0] if profile.firstname else 'U' }}
+                  </span>
+                </div>
+                <div class="hidden sm:block text-left">
+                  <p class="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition">
+                    {{ profile.firstname }} {{ profile.lastname }}
+                  </p>
+                  <p class="text-xs text-gray-500">Patient</p>
+                </div>
+                <i class="fas fa-chevron-down text-gray-400 text-xs group-hover:text-blue-600"></i>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div id="userMenu" 
+                  class="hidden absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
+                <a href="{{ url_for('abp.patient_profile') }}" 
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                <a href="#" 
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                <div class="border-t my-1"></div>
+                <a href="{{ url_for('abp.logout') }}" 
+                  class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+              </div>
+            </div>
+          </div>
         </header>
 
 
@@ -192,19 +204,42 @@
     </div>
   </div>
 
-  <!-- Mobile Menu Script -->
+  <!-- Mobile Menu + User Dropdown Script -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const toggle = document.getElementById('menuToggle');
-      const sidebar = document.querySelector('.w-64');
+    document.addEventListener("DOMContentLoaded", function () {
+      // ===== Mobile Menu Toggle =====
+      const toggle = document.getElementById("menuToggle");
+      const sidebar = document.querySelector(".w-64");
+
       if (toggle && sidebar) {
-        toggle.addEventListener('click', () => {
-          sidebar.classList.toggle('-translate-x-full');
-          sidebar.classList.toggle('fixed');
-          sidebar.classList.toggle('z-50');
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          sidebar.classList.toggle("-translate-x-full");
+          sidebar.classList.toggle("fixed");
+          sidebar.classList.toggle("z-50");
+        });
+      }
+
+      // ===== User Dropdown =====
+      const userMenuBtn = document.getElementById("userMenuBtn");
+      const userMenu = document.getElementById("userMenu");
+
+      if (userMenuBtn && userMenu) {
+        userMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          userMenu.classList.toggle("hidden");
+        });
+
+        // Close when clicking outside
+        document.addEventListener("click", (e) => {
+          if (!userMenuBtn.contains(e.target) && !userMenu.contains(e.target)) {
+            userMenu.classList.add("hidden");
+          }
         });
       }
     });
   </script>
+
 </body>
+
 {% endblock %}

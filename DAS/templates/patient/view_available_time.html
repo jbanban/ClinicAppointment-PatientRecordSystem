@@ -45,7 +45,7 @@
                                     </td>
                                     <td class="py-3 px-2 text-center">
                                         {% if schedule.status != 'Booked' %}
-                                        <form action="{{ url_for('book_appointment', doctor_schedule_id=schedule.doctor_schedule_id) }}" method="POST" class="text-green-600" onsubmit="return confirm('Are you sure you want to Book this schedule?');">
+                                        <form action="{{ url_for('abp.book_appointment', doctor_schedule_id=schedule.doctor_schedule_id) }}" method="POST" class="text-green-600" onsubmit="return confirm('Are you sure you want to Book this schedule?');">
                                             <input type="hidden" name="vacant_date" value="{{ schedule.vacant_date }}"> 
                                             <input type="hidden" name="vacant_time" value="{{ schedule.vacant_time }}">
                                             <input type="hidden" name="doctor_id" value="{{ schedule.doctor_id }}">

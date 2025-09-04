@@ -7,7 +7,7 @@
     <!-- Main Appointments Content -->
     <div class="flex-1 p-6">
         <div class="flex justify-end gap-2 mb-12">
-                <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                <a href="{{ url_for('abp.profile', user_id=current_user.get_id()) }}">
                     <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
                 </a>
             </div>
@@ -34,7 +34,7 @@
                                     <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ patient.appointment_date }} {{ patient.appointment_time }}</th>
                                     <th class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{{ patient.status }}</th>
                                     <td class="items-center justify-center inline-flex">
-                                        <form action="{{ url_for('done_appointment',appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
+                                        <form action="{{ url_for('abp.done_appointment',appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
                                             <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Done</button>
                                         </form>
                                     </td>

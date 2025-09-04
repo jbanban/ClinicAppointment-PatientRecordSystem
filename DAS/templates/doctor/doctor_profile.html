@@ -29,7 +29,7 @@
             
             <!-- Main content area -->
             <div class="w-full md:w-3/4">
-                <a class="absolute top-4 right-6" href="{{ url_for('doctor_dashboard')}}">X</a>
+                <a class="absolute top-4 right-6" href="{{ url_for('abp.doctor_dashboard')}}">X</a>
                 <!-- Doctor name and specialty -->
                 <div class="mb-4">
                     <h1 class="text-3xl font-medium text-slate-700">{{ doctor.lastname}}, {{ doctor.firstname }} MD.</h1>
@@ -40,7 +40,7 @@
                 <div class="flex flex-wrap gap-3 mb-6">
                     <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm">Accepting New Patients</button>
                     <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm">
-                        <a href="{{ url_for('doctors_schedule')}}">Open Schedule</a>
+                        <a href="{{ url_for('abp.doctors_schedule')}}">Open Schedule</a>
                     </button>
                 </div>
                 

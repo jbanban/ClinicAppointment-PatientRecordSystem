@@ -7,7 +7,7 @@
     <!-- Main Appointments Content -->
     <div class="flex-1 p-6">
         <div class="flex justify-end gap-2 mb-12">
-                <a href="{{ url_for('profile', user_id=session['user_id']) }}">
+                <a href="{{ url_for('abp.profile', user_id=current_user.get_id()) }}">
                     <img src="{{ url_for('static', filename='img/profile.jpg')}}" alt="profile" class="rounded-full w-8 h-8">
                 </a>
             </div>
@@ -41,7 +41,7 @@
                                             <!-- <form action="{{ url_for('reschedule_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-red-600 m-4">
                                                 <button type="submit" class="text-green-600 bg-transparent border-none cursor-pointer">Reschedule</button>
                                             </form> -->
-                                            <form action="{{ url_for('cancel_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
+                                            <form action="{{ url_for('abp.cancel_appointment', appointment_id=appointment.appointment_id) }}" method="POST" class="text-green-600 m-4">
                                                 <button type="submit" class="text-red-600 bg-transparent border-none cursor-pointer">Cancel</button>
                                             </form>
                                             {% else %}

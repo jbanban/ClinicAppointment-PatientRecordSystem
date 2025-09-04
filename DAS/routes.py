@@ -95,7 +95,7 @@ def admin_login():
             print("Password check passed")
             login_user(user)
             flash('Logged in successfully.', 'success')
-            return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('abp.admin_dashboard'))
         else:
             print("Login failed")
             flash('Login unsuccessful. Please check username and password.', 'danger')
@@ -112,13 +112,8 @@ def admin_register():
         db.session.add(new_user)
         db.session.commit()
         flash('Account created!', 'success')
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('abp.admin_login'))
     return render_template('admin/admin_register.html')
-
-from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import check_password_hash
-from .models import db, Account, Patient
 
 @abp.route("/", methods=["GET", "POST"])
 def login():
@@ -141,9 +136,9 @@ def login():
                 flash("Logged in successfully.", "success")
                 patient_profile = Patient.query.filter_by(account_id=user.account_id).first()
                 if patient_profile:
-                    return redirect(url_for("patient_dashboard"))
+                    return redirect(url_for("abp.patient_dashboard"))
                 else:
-                    return redirect(url_for("create_profile"))
+                    return redirect(url_for("abp.create_profile"))
 
         else:
             flash("Login Unsuccessful. Please check email and password", "danger")
@@ -253,7 +248,7 @@ def add_doctor():
         db.session.add(new_doctor)
         db.session.commit()
 
-        return redirect(url_for('admin_doctors'))
+        return redirect(url_for('abp.admin_doctors'))
     return render_template('admin/add_doctor.html', accounts=accounts)
 
 @abp.route('/admin_appointments')
@@ -298,7 +293,7 @@ def create_doctor_account():
         db.session.add(new_account)
         db.session.commit()
 
-        return redirect(url_for('create_doctor_account'))
+        return redirect(url_for('abp.create_doctor_account'))
     return render_template('admin/create_doctor_account.html',doctors=doctors)
 
 # Doctor dashboard
@@ -307,7 +302,7 @@ def create_doctor_account():
 def doctor_dashboard():
     if current_user.role != "doctor":
         flash("Access denied!", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
     return render_template("doctor/doctor_dashboard.html")
 
 
@@ -317,7 +312,7 @@ def doctor_dashboard():
 def doctors_patient():
     if current_user.role != "doctor":
         flash("Access denied!", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
 
     # use current_user.id (Flask-Login user id, tied to Account.account_id)
     patients = (
@@ -336,7 +331,7 @@ def doctors_patient():
 def doctors_appointment():
     if current_user.role != "doctor":
         flash("Access denied!", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
 
     appointments = Appointment.query.filter_by(
         doctor_id=current_user.account_id
@@ -349,7 +344,7 @@ def doctors_appointment():
 def doctors_schedule():
     if current_user.role != "doctor":
         flash("Access denied!", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
 
     doctor_id = current_user.account_id
 
@@ -367,7 +362,7 @@ def doctors_schedule():
         db.session.commit()
 
         flash("Schedule added successfully!", "success")
-        return redirect(url_for("doctors_schedule"))
+        return redirect(url_for("abp.doctors_schedule"))
 
     schedules = Doctor_Schedule.query.filter_by(doctor_id=doctor_id).all()
 
@@ -386,7 +381,7 @@ def available_doctors():
 def doctors_profile():
     if current_user.role != "doctor":
         flash("Access denied!", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
 
     doctor = Doctor.query.filter_by(account_id=current_user.account_id).first()
 
@@ -398,10 +393,10 @@ def doctors_profile():
 def accept_appointment(appointment_id):
     appointment = Appointment.query.get(appointment_id)
     if not appointment:
-        return redirect(url_for('doctors_appointment'))
+        return redirect(url_for('abp.doctors_appointment'))
     appointment.status = 'Accepted'
     db.session.commit()
-    return redirect(url_for('doctors_appointment'))
+    return redirect(url_for('abp.doctors_appointment'))
 
 @abp.route('/doctors/reject_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -409,10 +404,10 @@ def accept_appointment(appointment_id):
 def reject_appointment(appointment_id):
     appointment = Appointment.query.get(appointment_id)
     if not appointment:
-        return redirect(url_for('doctors_appointment'))
+        return redirect(url_for('abp.doctors_appointment'))
     appointment.status = 'Rejected'
     db.session.commit()
-    return redirect(url_for('doctors_appointment'))
+    return redirect(url_for('abp.doctors_appointment'))
 
 @abp.route('/doctors/done_appointment/<int:appointment_id>', methods=['POST'])
 @login_required
@@ -420,10 +415,10 @@ def reject_appointment(appointment_id):
 def done_appointment(appointment_id):
     appointment = Appointment.query.get(appointment_id)
     if not appointment:
-        return redirect(url_for('doctors_appointment'))
+        return redirect(url_for('abp.doctors_appointment'))
     appointment.status = 'Done'
     db.session.commit()
-    return redirect(url_for('doctors_appointment'))
+    return redirect(url_for('abp.doctors_appointment'))
 
 @abp.route('/doctors/delete_schedule/<int:doctor_schedule_id>', methods=['POST'])
 @login_required
@@ -431,10 +426,10 @@ def done_appointment(appointment_id):
 def delete_doctor_schedule(doctor_schedule_id):
     schedule = Doctor_Schedule.query.get(doctor_schedule_id)
     if not schedule:
-        return redirect(url_for('doctors_schedule'))
+        return redirect(url_for('abp.doctors_schedule'))
     db.session.delete(schedule)
     db.session.commit()
-    return redirect(url_for('doctors_schedule'))
+    return redirect(url_for('abp.doctors_schedule'))
 
 @abp.route('/medical_records', methods=['GET','POST'])
 def medical_records():
@@ -448,7 +443,7 @@ def patient_dashboard():
     profile = Patient.query.filter_by(account_id=current_user.account_id).first()
 
     if not profile:
-        return redirect(url_for("create_profile"))
+        return redirect(url_for("abp.create_profile"))
 
     appointments = Appointment.query.filter_by(patient_id=current_user.account_id).all()
 
@@ -486,13 +481,9 @@ def create_profile():
         db.session.commit()
 
         flash("Profile created successfully!", "success")
-        return redirect(url_for("patient_dashboard"))
+        return redirect(url_for("abp.patient_dashboard"))
 
     return render_template("patient/create_profile.html")
-
-from flask_login import login_required, current_user
-from flask import redirect, url_for, render_template, request, flash
-from .models import db, Patient, Appointment, Doctor_Schedule
 
 # Patient Profile
 @abp.route("/patient_profile")
@@ -501,7 +492,7 @@ from .models import db, Patient, Appointment, Doctor_Schedule
 def patient_profile():
     profile = Patient.query.filter_by(account_id=current_user.account_id).first()
     if not profile:
-        return redirect(url_for("create_profile"))
+        return redirect(url_for("abp.create_profile"))
     return render_template("patient/patient_profile.html", profile=profile)
 
 # Patient Appointments
@@ -529,7 +520,7 @@ def book_appointment(doctor_schedule_id):
 
     if not schedule:
         flash('Schedule not found.', 'error')
-        return redirect(url_for('patient_appointment'))
+        return redirect(url_for('abp.patient_appointment'))
 
     if request.method == 'POST':
         patient_id = current_user.account_id,
@@ -553,7 +544,7 @@ def book_appointment(doctor_schedule_id):
         db.session.commit()
         print("Before Commit:", schedule.status)
         flash('Appointment booked successfully!', 'success')
-        return redirect(url_for('patient_appointment'))
+        return redirect(url_for('abp.patient_appointment'))
 
     return render_template('patient/book_appointment.html')
 
@@ -568,7 +559,7 @@ def reschedule_appointment(appointment_id):
     # Ensure the appointment belongs to the logged-in patient
     if appointment.patient_id != current_user.account_id:
         flash("You are not authorized to reschedule this appointment.", "danger")
-        return redirect(url_for("unauthorized"))
+        return redirect(url_for("abp.unauthorized"))
 
     if request.method == 'POST':
         preferred_date = request.form.get('preferred_date')
@@ -576,7 +567,7 @@ def reschedule_appointment(appointment_id):
 
         if not preferred_date or not preferred_time:
             flash("Missing date or time.", "danger")
-            return redirect(url_for("reschedule_appointment", appointment_id=appointment_id))
+            return redirect(url_for("abp.reschedule_appointment", appointment_id=appointment_id))
 
         # Update appointment
         appointment.appointment_date = preferred_date
@@ -584,7 +575,7 @@ def reschedule_appointment(appointment_id):
         db.session.commit()
 
         flash("Appointment rescheduled successfully!", "success")
-        return redirect(url_for('patient_appointment'))
+        return redirect(url_for('abp.patient_appointment'))
 
     return render_template('patient/reschedule_appointment.html', appointment=appointment)
 
@@ -593,12 +584,12 @@ def cancel_appointment(appointment_id):
     appointment = Appointment.query.get(appointment_id)
 
     if not appointment:
-        return redirect(url_for('patient_appointment'))
+        return redirect(url_for('abp.patient_appointment'))
 
     appointment.status = 'Cancelled'
     db.session.commit()
 
-    return redirect(url_for('patient_appointment'))
+    return redirect(url_for('abp.patient_appointment'))
 
 from flask_login import login_required, current_user
 
@@ -616,7 +607,7 @@ def create_appointment():
 
         if not appointment_date or not appointment_time or not doctor_id:
             flash("All fields are required.", "danger")
-            return redirect(url_for("create_appointment"))
+            return redirect(url_for("abp.create_appointment"))
 
         new_appointment = Appointment(
             patient_id=current_user.account_id,  # 🔑 patient comes from logged-in user
@@ -630,7 +621,7 @@ def create_appointment():
         db.session.commit()
 
         flash("Appointment request submitted successfully!", "success")
-        return redirect(url_for('patient_appointment'))
+        return redirect(url_for('abp.patient_appointment'))
 
     return render_template('patient/create_appointment.html', doctors=doctors)
 

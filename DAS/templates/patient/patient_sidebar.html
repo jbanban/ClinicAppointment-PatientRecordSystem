@@ -12,8 +12,8 @@
   <div class="flex min-h-screen">
     <aside class="w-64 bg-white shadow-xl flex flex-col">
       <!-- Logo / Header -->
-      <div class="mb-8">
-        <img src="/static/img/logo-name-removebg-preview.png" class="p-2 w-100px" alt="logo">
+      <div class="mb-8 justify-center ml-8 mt-4">
+        <img src="/static/img/logo-name-removebg-preview.png" class="p-2 h-16" alt="logo">
       </div>
 
       <!-- Navigation -->
@@ -83,7 +83,7 @@
           </li>
 
           <li>
-            <a href="{{ url_for('abp.patient_profile') }}" 
+            <a href="{{ url_for('abp.medical_record', ) }}" 
               class="flex items-center p-3 rounded-xl transition
                       {% if request.endpoint == 'abp.patient_profile' %}
                           bg-blue-600 text-white
@@ -93,7 +93,7 @@
               <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 21 21">
                 <path d="M10 2a4 4 0 1 1-2 7.465A4 4 0 0 1 10 2ZM3 18a7 7 0 0 1 14 0v1H3v-1Z"/>
               </svg>
-              <span class="font-medium">Profile</span>
+              <span class="font-medium">My Medical Record</span>
             </a>
           </li>
         </ul>

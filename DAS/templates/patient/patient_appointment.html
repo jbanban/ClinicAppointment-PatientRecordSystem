@@ -33,7 +33,7 @@
                                 <tr>
                                     <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.appointment_date }}</td>
                                     <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.appointment_time }}</td>
-                                    <td class="py-2 text-center text-sm font-medium bg-green-100 text-green-800 text-xs rounded-full">{{ appointment.status }}</td>
+                                    <td class="py-2 text-center text-sm font-medium bg-green-100 text-green-800 rounded-full">{{ appointment.status }}</td>
                                     <td class="py-2 text-center text-sm font-medium text-gray-800 mb-2">{{ appointment.doctor.firstname }} {{ appointment.doctor.lastname }}</td>
                                     <td class="flex text-center text-sm font-medium text-gray-800 mb-2">
                                         {% if appointment.status != 'Accepted' and appointment.status != 'Rejected' %}

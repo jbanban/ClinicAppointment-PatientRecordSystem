@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # from datetime import datetime
 # from collections import Counter
 
-from .models import db, Appointment, Doctor, User, Account, Patient, Doctor_Schedule
+from .models import db, Appointment, Doctor, User, Account, Patient, Doctor_Schedule, MedicalRecord
 
 abp = Blueprint("abp", __name__)
 
@@ -453,6 +453,200 @@ def patient_dashboard():
         appointments=appointments
     )
 
+@abp.route("/medical_record/<int:patient_id>")
+def medical_record(patient_id):
+    record = MedicalRecord.query.filter_by(account_id=current_user.account_id).first()
+    if patient_id is not MedicalRecord:
+        return redirect(url_for("abp.submit_medical_form"))
+    return render_template("patient/medical_record.html", record=record)
+
+@abp.route('/submit-medical-form', methods=['GET', 'POST'])
+@login_required
+@role_required("patient", "admin")
+def submit_medical_form():
+    if request.method == "GET":
+        # Render the medical form template
+        return render_template("patient/medical_form.html")
+    
+    if request.method == "POST":
+        # Extract personal information
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        phone = request.form.get("phone")
+        
+        # Construct birthdate from separate fields
+        birth_month = request.form.get("birth_month")
+        birth_day = request.form.get("birth_day")
+        birth_year = request.form.get("birth_year")
+        
+        birthdate = None
+        if birth_month and birth_day and birth_year:
+            try:
+                birthdate = f"{birth_year}-{birth_month.zfill(2)}-{birth_day.zfill(2)}"
+            except:
+                flash("Invalid birth date format", "error")
+                return render_template("patient/medical_form.html")
+        
+        # Address information
+        street_address = request.form.get("street_address")
+        street_address_2 = request.form.get("street_address_2")
+        city = request.form.get("city")
+        state = request.form.get("state")
+        
+        # Combine address fields
+        address_parts = [part for part in [street_address, street_address_2, city, state] if part]
+        address = ", ".join(address_parts) if address_parts else None
+        
+        # Basic measurements
+        weight = request.form.get("weight")
+        height = request.form.get("height")
+        
+        # Emergency contact information
+        emergency_first_name = request.form.get("emergency_first_name")
+        emergency_last_name = request.form.get("emergency_last_name")
+        emergency_name = f"{emergency_first_name} {emergency_last_name}".strip() if emergency_first_name or emergency_last_name else None
+        
+        emergency_street = request.form.get("emergency_street")
+        emergency_street_2 = request.form.get("emergency_street_2")
+        emergency_city = request.form.get("emergency_city")
+        emergency_state = request.form.get("emergency_state")
+        
+        emergency_address_parts = [part for part in [emergency_street, emergency_street_2, emergency_city, emergency_state] if part]
+        emergency_address = ", ".join(emergency_address_parts) if emergency_address_parts else None
+        
+        emergency_home_phone = request.form.get("emergency_home_phone")
+        emergency_work_phone = request.form.get("emergency_work_phone")
+        
+        # Medical history information
+        hepatitis_b = request.form.get("hepatitis_b")
+        emergency_info = request.form.get("emergency_info")
+        
+        # Chronic conditions
+        chronic_flu_smoking = request.form.get("chronic_flu_smoking") == "on"
+        chronic_flu_not_smoking = request.form.get("chronic_flu_not_smoking") == "on"
+        drinking_smoking = request.form.get("drinking_smoking") == "on"
+        drinking_not_smoking = request.form.get("drinking_not_smoking") == "on"
+        
+        medical_history = request.form.get("medical_history")
+        medical_problems = request.form.get("medical_problems")
+        medications = request.form.get("medications")
+        allergies = request.form.get("allergies")
+        
+        # Insurance information
+        has_insurance = request.form.get("has_insurance")
+        insurance_company = request.form.get("insurance_company")
+        
+        insurance_street = request.form.get("insurance_street")
+        insurance_street_2 = request.form.get("insurance_street_2")
+        insurance_city = request.form.get("insurance_city")
+        insurance_state = request.form.get("insurance_state")
+        
+        insurance_address_parts = [part for part in [insurance_street, insurance_street_2, insurance_city, insurance_state] if part]
+        insurance_address = ", ".join(insurance_address_parts) if insurance_address_parts else None
+        
+        policy_number = request.form.get("policy_number")
+        
+        # Insurance expiry date
+        expiry_month = request.form.get("expiry_month")
+        expiry_day = request.form.get("expiry_day")
+        expiry_year = request.form.get("expiry_year")
+        
+        insurance_expiry = None
+        if expiry_month and expiry_day and expiry_year:
+            try:
+                insurance_expiry = f"{expiry_year}-{expiry_month.zfill(2)}-{expiry_day.zfill(2)}"
+            except:
+                flash("Invalid insurance expiry date format", "error")
+                return render_template("patient/PatientMedicalRecord.html")
+        
+        try:
+            # Check if patient profile already exists
+            existing_patient = Patient.query.filter_by(account_id=current_user.account_id).first()
+            
+            if existing_patient:
+                # Update existing patient record
+                existing_patient.firstname = first_name or existing_patient.firstname
+                existing_patient.lastname = last_name or existing_patient.lastname
+                existing_patient.phone = phone or existing_patient.phone
+                if birthdate:
+                    existing_patient.birthdate = birthdate
+                existing_patient.address = address or existing_patient.address
+                
+                # Add new fields to existing patient (you may need to add these columns to your Patient model)
+                if hasattr(existing_patient, 'weight'):
+                    existing_patient.weight = weight
+                if hasattr(existing_patient, 'height'):
+                    existing_patient.height = height
+                if hasattr(existing_patient, 'emergency_contact_name'):
+                    existing_patient.emergency_contact_name = emergency_name
+                if hasattr(existing_patient, 'emergency_contact_address'):
+                    existing_patient.emergency_contact_address = emergency_address
+                if hasattr(existing_patient, 'emergency_home_phone'):
+                    existing_patient.emergency_home_phone = emergency_home_phone
+                if hasattr(existing_patient, 'emergency_work_phone'):
+                    existing_patient.emergency_work_phone = emergency_work_phone
+                if hasattr(existing_patient, 'hepatitis_b_vaccination'):
+                    existing_patient.hepatitis_b_vaccination = hepatitis_b
+                if hasattr(existing_patient, 'medical_history'):
+                    existing_patient.medical_history = medical_history
+                if hasattr(existing_patient, 'medical_problems'):
+                    existing_patient.medical_problems = medical_problems
+                if hasattr(existing_patient, 'current_medications'):
+                    existing_patient.current_medications = medications
+                if hasattr(existing_patient, 'allergies'):
+                    existing_patient.allergies = allergies
+                if hasattr(existing_patient, 'has_insurance'):
+                    existing_patient.has_insurance = has_insurance == "yes"
+                if hasattr(existing_patient, 'insurance_company'):
+                    existing_patient.insurance_company = insurance_company
+                if hasattr(existing_patient, 'insurance_address'):
+                    existing_patient.insurance_address = insurance_address
+                if hasattr(existing_patient, 'policy_number'):
+                    existing_patient.policy_number = policy_number
+                if hasattr(existing_patient, 'insurance_expiry'):
+                    existing_patient.insurance_expiry = insurance_expiry
+                
+                flash("Medical information updated successfully!", "success")
+            else:
+                # Create new patient record with all medical information
+                patient = Patient(
+                    firstname=first_name,
+                    lastname=last_name,
+                    phone=phone,
+                    birthdate=birthdate,
+                    address=address,
+                    account_id=current_user.account_id
+                    # Add additional fields if they exist in your model
+                    # weight=weight,
+                    # height=height,
+                    # emergency_contact_name=emergency_name,
+                    # emergency_contact_address=emergency_address,
+                    # emergency_home_phone=emergency_home_phone,
+                    # emergency_work_phone=emergency_work_phone,
+                    # hepatitis_b_vaccination=hepatitis_b,
+                    # medical_history=medical_history,
+                    # medical_problems=medical_problems,
+                    # current_medications=medications,
+                    # allergies=allergies,
+                    # has_insurance=has_insurance == "yes",
+                    # insurance_company=insurance_company,
+                    # insurance_address=insurance_address,
+                    # policy_number=policy_number,
+                    # insurance_expiry=insurance_expiry
+                )
+                
+                db.session.add(patient)
+                flash("Medical profile created successfully!", "success")
+            
+            db.session.commit()
+            return redirect(url_for("abp.patient_dashboard"))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error processing medical form: {str(e)}", "error")
+            return render_template("patient/medical_form.html")
+    
+    return render_template("patient/medical_form.html")
 
 # Create profile
 @abp.route("/create_profile", methods=["GET", "POST"])

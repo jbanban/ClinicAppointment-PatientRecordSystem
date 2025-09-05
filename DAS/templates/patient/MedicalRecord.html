@@ -1,0 +1,207 @@
+{% extends 'base/layout.html' %}
+{% block title %}Patient Medical Form{% endblock %}
+{% block head_includes %}
+    <script>
+        function printRecord() {
+            window.print();
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+            }
+            .print-shadow {
+                box-shadow: none !important;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <body class="bg-blue-50 min-h-screen py-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg print-shadow p-8">
+            <!-- Header with Date and Print Button -->
+            <div class="flex justify-between items-center mb-6 no-print">
+                <div></div>
+                <button onclick="printRecord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a1 1 0 001-1v-4a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 001 1zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Print Record
+                </button>
+            </div>
+
+            <!-- Date in top right corner -->
+            <div class="text-right text-gray-600 mb-4">
+                <span id="record-date">12/9/2018</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-3xl font-bold text-blue-700 mb-8">Patient Medical Record</h1>
+
+            <!-- Patient Information Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Left Column -->
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-700 mb-4">Patient Information</h2>
+                    <div class="space-y-2">
+                        <div class="font-semibold text-gray-800" id="patient-name">Goldie R Chisolm</div>
+                        <div class="text-gray-700" id="patient-phone">(706) 296-9964</div>
+                        <div class="text-gray-700" id="patient-address">
+                            1195 Holly Street<br>
+                            Athens, Georgia(GA), 30601<br>
+                            United States
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-700 mb-4">Birth Date</h2>
+                    <div class="text-gray-800 mb-4" id="birth-date">March 21 1972</div>
+
+                    <h2 class="text-lg font-semibold text-blue-700 mb-2">Weight:</h2>
+                    <div class="text-gray-800 mb-4" id="weight">62.69</div>
+
+                    <h2 class="text-lg font-semibold text-blue-700 mb-2">Height:</h2>
+                    <div class="text-gray-800" id="height">157</div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact Section -->
+            <div class="border-t-2 border-red-500 pt-6 mb-8">
+                <h2 class="text-xl font-semibold text-red-600 mb-6">In Case of Emergency</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Left Column -->
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-2" id="emergency-name">Bertie C Rowell</div>
+                        
+                        <h3 class="text-sm font-semibold text-blue-700 mb-1">Home phone</h3>
+                        <div class="text-gray-700 mb-4" id="emergency-home-phone">(202) 452-9485</div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <div class="text-gray-700 mb-4" id="emergency-address">
+                            4026 Hickory Lane<br>
+                            Washington, Washington DC(DC), 20036<br>
+                            United States
+                        </div>
+
+                        <h3 class="text-sm font-semibold text-blue-700 mb-1">Work phone</h3>
+                        <div class="text-gray-700" id="emergency-work-phone">(323) 650-1865</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Medical History Section -->
+            <div class="border-t-2 border-blue-500 pt-6 mb-8">
+                <h2 class="text-xl font-semibold text-blue-700 mb-6">General Medical History</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                    <!-- Left Column -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-700 mb-2">Chicken Pox (Varicella):</h3>
+                        <div class="bg-gray-100 px-3 py-1 rounded text-gray-800 inline-block mb-4" id="chicken-pox">NOT IMMUNE</div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-700 mb-2">Measles:</h3>
+                        <div class="bg-gray-100 px-3 py-1 rounded text-gray-800 inline-block mb-4" id="measles">NOT IMMUNE</div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-blue-700 mb-2">Have you had the Hepatitis B vaccination?</h3>
+                    <div class="bg-gray-100 px-3 py-1 rounded text-gray-800 inline-block" id="hepatitis-b">No</div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-blue-700 mb-2">List any Medical Problems (asthma, seizures, headaches):</h3>
+                    <div class="text-gray-800 leading-relaxed" id="medical-problems">
+                        Lectus magna fringilla urna porttitor rhoncus dolor. Interdum velit laoreet id donec ultrices tincidunt arcu. 
+                        Laoreet sit amet cursus sit amet. Quam viverra orci sagittis eu volutpat odio facilisis.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance Information Section -->
+            <div class="border-t border-gray-300 pt-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Left Column -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-700 mb-2">Name of Insurance Company:</h3>
+                        <div class="text-gray-800 mb-4" id="insurance-company">Lorem ipsum dolor sit amet</div>
+
+                        <h3 class="text-sm font-semibold text-blue-700 mb-2">Policy Number:</h3>
+                        <div class="text-gray-800" id="policy-number">56796</div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <div class="text-gray-700 mb-4" id="insurance-address">
+                            4208 Crestview Manor<br>
+                            Indianapolis, Indiana(IN), 46204
+                        </div>
+
+                        <h3 class="text-sm font-semibold text-blue-700 mb-2">Expiry Date:</h3>
+                        <div class="text-gray-800" id="expiry-date">8 December 2018</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Number -->
+            <div class="text-center text-gray-500 text-sm mt-8 border-t pt-4">
+                <span>1</span>
+            </div>
+        </div>
+
+        <!-- JavaScript to populate data dynamically -->
+        <script>
+            // Example function to populate the medical record with data
+            function populateRecord(patientData) {
+                // Update patient information
+                if (patientData.name) document.getElementById('patient-name').textContent = patientData.name;
+                if (patientData.phone) document.getElementById('patient-phone').textContent = patientData.phone;
+                if (patientData.address) document.getElementById('patient-address').innerHTML = patientData.address;
+                if (patientData.birthDate) document.getElementById('birth-date').textContent = patientData.birthDate;
+                if (patientData.weight) document.getElementById('weight').textContent = patientData.weight;
+                if (patientData.height) document.getElementById('height').textContent = patientData.height;
+                
+                // Update emergency contact
+                if (patientData.emergencyName) document.getElementById('emergency-name').textContent = patientData.emergencyName;
+                if (patientData.emergencyHomePhone) document.getElementById('emergency-home-phone').textContent = patientData.emergencyHomePhone;
+                if (patientData.emergencyWorkPhone) document.getElementById('emergency-work-phone').textContent = patientData.emergencyWorkPhone;
+                if (patientData.emergencyAddress) document.getElementById('emergency-address').innerHTML = patientData.emergencyAddress;
+                
+                // Update medical history
+                if (patientData.chickenPox) document.getElementById('chicken-pox').textContent = patientData.chickenPox;
+                if (patientData.measles) document.getElementById('measles').textContent = patientData.measles;
+                if (patientData.hepatitisB) document.getElementById('hepatitis-b').textContent = patientData.hepatitisB;
+                if (patientData.medicalProblems) document.getElementById('medical-problems').textContent = patientData.medicalProblems;
+                
+                // Update insurance information
+                if (patientData.insuranceCompany) document.getElementById('insurance-company').textContent = patientData.insuranceCompany;
+                if (patientData.policyNumber) document.getElementById('policy-number').textContent = patientData.policyNumber;
+                if (patientData.insuranceAddress) document.getElementById('insurance-address').innerHTML = patientData.insuranceAddress;
+                if (patientData.expiryDate) document.getElementById('expiry-date').textContent = patientData.expiryDate;
+                
+                // Update record date
+                if (patientData.recordDate) document.getElementById('record-date').textContent = patientData.recordDate;
+            }
+
+            // Example usage - you can call this function with Flask template data
+            // populateRecord({
+            //     name: "{{ profile.firstname }} {{ profile.lastname }}",
+            //     phone: "{{ profile.phone }}",
+            //     birthDate: "{{ profile.birthdate.strftime('%B %d %Y') if profile.birthdate else '' }}",
+            //     // ... other fields
+            // });
+        </script>
+    </body>
+{% endblock %}
